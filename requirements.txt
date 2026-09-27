@@ -1,0 +1,10 @@
+# Phase 1: Dataset Acquisition and Exploration Dependencies
+datasets>=2.19.0
+pandas>=2.2.0
+numpy>=1.26.0
+pyarrow>=15.0.0
+tqdm>=4.66.0
+pytest>=8.0.0
+
+# Phase 2: NLP Preprocessing Pipeline Dependencies
+spacy>=3.7.0

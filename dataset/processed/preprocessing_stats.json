@@ -1,0 +1,36 @@
+{
+  "total_articles": 1000,
+  "sentences_per_article": {
+    "mean": 33.47,
+    "median": 30.0,
+    "min": 3,
+    "max": 112
+  },
+  "tokens_per_article": {
+    "mean": 739.86,
+    "median": 671.5,
+    "min": 94,
+    "max": 2486
+  },
+  "content_tokens_per_article": {
+    "mean": 325.24,
+    "median": 291.0,
+    "min": 39,
+    "max": 1357
+  },
+  "stopwords_per_article": {
+    "mean": 311.81,
+    "median": 281.0,
+    "min": 34,
+    "max": 910
+  },
+  "entities_per_article": {
+    "mean": 61.72,
+    "median": 53.0,
+    "min": 4,
+    "max": 499
+  },
+  "total_tokens_evaluated": 739860,
+  "tokens_changed_by_normalization": 103881,
+  "percentage_tokens_changed_by_normalization": 14.04
+}

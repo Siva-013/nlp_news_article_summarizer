@@ -1,0 +1,53 @@
+{
+  "dataset": {
+    "name": "cnn_dailymail",
+    "version": "3.0.0",
+    "split": "test",
+    "sample_size": 100,
+    "random_seed": 42
+  },
+  "articles": {
+    "word_count": {
+      "min": 102,
+      "max": 1481,
+      "mean": 540.92,
+      "median": 423.0,
+      "std": 340.05
+    },
+    "sentence_count": {
+      "min": 4,
+      "max": 117,
+      "mean": 26.55,
+      "median": 21.5,
+      "std": 18.28
+    }
+  },
+  "highlights": {
+    "word_count": {
+      "min": 18,
+      "max": 59,
+      "mean": 34.46,
+      "median": 32.5,
+      "std": 9.72
+    },
+    "sentence_count": {
+      "min": 1,
+      "max": 5,
+      "mean": 2.62,
+      "median": 3.0,
+      "std": 0.69
+    }
+  },
+  "compression_ratio": {
+    "min": 0.0185,
+    "max": 0.2973,
+    "mean": 0.0935,
+    "median": 0.0688
+  },
+  "vocabulary": {
+    "mean_unique_words": 277.19,
+    "median_unique_words": 240.5,
+    "mean_ttr": 0.5518,
+    "median_ttr": 0.5587
+  }
+}
