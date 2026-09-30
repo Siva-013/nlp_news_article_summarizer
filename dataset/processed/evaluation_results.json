@@ -1,0 +1,282 @@
+{
+  "metadata": {
+    "num_articles_evaluated": 1000,
+    "dataset_file": "dataset\\processed\\cnn_dailymail_test_1000_processed.jsonl",
+    "evaluation_elapsed_seconds": 4.45,
+    "algorithms_compared": [
+      "frequency",
+      "tfidf",
+      "textrank"
+    ],
+    "best_algorithms_by_f1": {
+      "rouge1": "textrank",
+      "rouge2": "textrank",
+      "rougeL": "textrank"
+    }
+  },
+  "overall_macro_results": {
+    "frequency": {
+      "rouge1": {
+        "precision": {
+          "mean": 0.213403,
+          "median": 0.2,
+          "std": 0.106753,
+          "min": 0.0,
+          "max": 0.666667
+        },
+        "recall": {
+          "mean": 0.288561,
+          "median": 0.266667,
+          "std": 0.157907,
+          "min": 0.0,
+          "max": 0.846154
+        },
+        "f1": {
+          "mean": 0.230587,
+          "median": 0.218002,
+          "std": 0.105954,
+          "min": 0.0,
+          "max": 0.666667
+        }
+      },
+      "rouge2": {
+        "precision": {
+          "mean": 0.057344,
+          "median": 0.034483,
+          "std": 0.075038,
+          "min": 0.0,
+          "max": 0.576923
+        },
+        "recall": {
+          "mean": 0.084569,
+          "median": 0.043478,
+          "std": 0.110596,
+          "min": 0.0,
+          "max": 0.681818
+        },
+        "f1": {
+          "mean": 0.064368,
+          "median": 0.037037,
+          "std": 0.080944,
+          "min": 0.0,
+          "max": 0.545455
+        }
+      },
+      "rougeL": {
+        "precision": {
+          "mean": 0.150783,
+          "median": 0.133333,
+          "std": 0.084994,
+          "min": 0.0,
+          "max": 0.666667
+        },
+        "recall": {
+          "mean": 0.202397,
+          "median": 0.178571,
+          "std": 0.119629,
+          "min": 0.0,
+          "max": 0.736842
+        },
+        "f1": {
+          "mean": 0.161876,
+          "median": 0.145833,
+          "std": 0.081742,
+          "min": 0.0,
+          "max": 0.666667
+        }
+      }
+    },
+    "tfidf": {
+      "rouge1": {
+        "precision": {
+          "mean": 0.152385,
+          "median": 0.136364,
+          "std": 0.11134,
+          "min": 0.0,
+          "max": 0.8
+        },
+        "recall": {
+          "mean": 0.112849,
+          "median": 0.083333,
+          "std": 0.109055,
+          "min": 0.0,
+          "max": 0.75
+        },
+        "f1": {
+          "mean": 0.120073,
+          "median": 0.103448,
+          "std": 0.095983,
+          "min": 0.0,
+          "max": 0.690909
+        }
+      },
+      "rouge2": {
+        "precision": {
+          "mean": 0.023823,
+          "median": 0.0,
+          "std": 0.066336,
+          "min": 0.0,
+          "max": 0.75
+        },
+        "recall": {
+          "mean": 0.021112,
+          "median": 0.0,
+          "std": 0.061519,
+          "min": 0.0,
+          "max": 0.571429
+        },
+        "f1": {
+          "mean": 0.020468,
+          "median": 0.0,
+          "std": 0.056141,
+          "min": 0.0,
+          "max": 0.603774
+        }
+      },
+      "rougeL": {
+        "precision": {
+          "mean": 0.116126,
+          "median": 0.105263,
+          "std": 0.08778,
+          "min": 0.0,
+          "max": 0.8
+        },
+        "recall": {
+          "mean": 0.083748,
+          "median": 0.064173,
+          "std": 0.081471,
+          "min": 0.0,
+          "max": 0.733333
+        },
+        "f1": {
+          "mean": 0.089836,
+          "median": 0.076436,
+          "std": 0.072017,
+          "min": 0.0,
+          "max": 0.52381
+        }
+      }
+    },
+    "textrank": {
+      "rouge1": {
+        "precision": {
+          "mean": 0.1933,
+          "median": 0.178838,
+          "std": 0.08733,
+          "min": 0.0,
+          "max": 0.683333
+        },
+        "recall": {
+          "mean": 0.412363,
+          "median": 0.4,
+          "std": 0.174328,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "f1": {
+          "mean": 0.253572,
+          "median": 0.242424,
+          "std": 0.102942,
+          "min": 0.0,
+          "max": 0.700855
+        }
+      },
+      "rouge2": {
+        "precision": {
+          "mean": 0.063142,
+          "median": 0.045455,
+          "std": 0.065955,
+          "min": 0.0,
+          "max": 0.474576
+        },
+        "recall": {
+          "mean": 0.144036,
+          "median": 0.097561,
+          "std": 0.14825,
+          "min": 0.0,
+          "max": 0.842105
+        },
+        "f1": {
+          "mean": 0.084972,
+          "median": 0.058323,
+          "std": 0.0863,
+          "min": 0.0,
+          "max": 0.488189
+        }
+      },
+      "rougeL": {
+        "precision": {
+          "mean": 0.132912,
+          "median": 0.117647,
+          "std": 0.068172,
+          "min": 0.0,
+          "max": 0.583333
+        },
+        "recall": {
+          "mean": 0.285863,
+          "median": 0.259259,
+          "std": 0.145755,
+          "min": 0.0,
+          "max": 0.913043
+        },
+        "f1": {
+          "mean": 0.174577,
+          "median": 0.156693,
+          "std": 0.082959,
+          "min": 0.0,
+          "max": 0.598291
+        }
+      }
+    }
+  },
+  "per_article_win_statistics": {
+    "rouge1": {
+      "frequency": 352,
+      "tfidf": 81,
+      "textrank": 507,
+      "tie": 60
+    },
+    "rouge2": {
+      "frequency": 283,
+      "tfidf": 80,
+      "textrank": 464,
+      "tie": 173
+    },
+    "rougeL": {
+      "frequency": 383,
+      "tfidf": 95,
+      "textrank": 463,
+      "tie": 59
+    }
+  },
+  "summary_length_statistics": {
+    "frequency": {
+      "mean": 43.511,
+      "median": 43.0,
+      "std": 17.354627,
+      "min": 3.0,
+      "max": 100.0
+    },
+    "tfidf": {
+      "mean": 21.651,
+      "median": 20.0,
+      "std": 10.916426,
+      "min": 3.0,
+      "max": 79.0
+    },
+    "textrank": {
+      "mean": 69.724,
+      "median": 69.0,
+      "std": 22.716467,
+      "min": 3.0,
+      "max": 191.0
+    },
+    "reference": {
+      "mean": 34.47,
+      "median": 34.0,
+      "std": 9.668432,
+      "min": 14.0,
+      "max": 80.0
+    }
+  }
+}

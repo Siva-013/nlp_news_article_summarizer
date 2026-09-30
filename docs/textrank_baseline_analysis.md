@@ -2,9 +2,9 @@
 
 ## 1. Objective
 
-Phase 5 introduces graph-based centrality to extractive text summarization by implementing the classical **TextRank** algorithm from first principles. 
+Phase 5 introduces graph-based sentence centrality to extractive text summarization by implementing the classical **TextRank** algorithm from first principles.
 
-While Phase 3 (Frequency) relied on overall term repetition and Phase 4 (TF-IDF) focused on term distinctiveness, TextRank models the entire news article as a **fully connected or sparse semantic network**. Sentences serve as nodes, and edges represent lexical similarity between sentences. Sentence salience is derived not from isolated feature counts, but from **global graph recommendation** via PageRank.
+While Phase 3 (Frequency) relied on overall term repetition and Phase 4 (TF-IDF) focused on isolated term distinctiveness, TextRank models the entire news article as a **weighted lexical similarity graph**. Sentences serve as nodes, and edges represent lexical overlap between sentences weighted by TF-IDF representations. Sentence salience is derived not from isolated feature counts, but from **graph-based lexical recommendation** via PageRank.
 
 The primary objectives of this phase are:
 - Implement classical TextRank from scratch without black-box graph or PageRank libraries (such as `networkx.pagerank`).
@@ -28,9 +28,12 @@ Sentence S_3 <=========> Sentence S_4
 ```
 
 1. **Nodes as Sentences**: Each sentence in an article corresponds to a vertex $V_i$ in graph $G = (V, E)$.
-2. **Edges as Similarity**: An undirected edge exists between $V_i$ and $V_j$ ($i \ne j$), weighted by their content similarity $W(i, j) \in [0, 1]$.
-3. **Graph Recommendation**: A sentence has high prestige if it is strongly connected to other sentences that themselves have high prestige.
-4. **Iterative Centrality**: Initial uniform probability mass is iteratively propagated across weighted edges until the node scores stabilize (converge).
+2. **Edges as Lexical Similarity**: An undirected edge exists between $V_i$ and $V_j$ ($i \ne j$), weighted by their lexical similarity $W(i, j) \in [0, 1]$ computed via TF-IDF cosine similarity.
+3. **Graph Recommendation**: A sentence achieves high centrality if it is strongly connected to other sentences that themselves possess high centrality.
+4. **Iterative Centrality**: Initial uniform probability mass ($1/N$) is iteratively propagated across weighted edges until the node scores stabilize (converge).
+
+> [!NOTE]
+> **Lexical vs. Semantic Distinction**: The similarity graph in this implementation represents **lexical similarity based on TF-IDF sentence representations** (exact lemma and token overlap weighted by distinctiveness). It does **not** model embedding-based semantic similarity (such as Word2Vec, GloVe, BERT, or sentence transformers), which are intentionally excluded from this classical NLP project.
 
 ---
 
@@ -42,41 +45,42 @@ $$\text{TF}(t, S) = \frac{\text{count}(t \in S)}{|C(S)|}$$
 $$\text{DF}(t) = \sum_{i=1}^N \mathbb{I}(t \in S_i)$$
 $$\text{IDF}(t) = \ln\left(\frac{N}{\text{DF}(t)}\right)$$
 $$\text{TFIDF}(t, S) = \text{TF}(t, S) \times \text{IDF}(t)$$
-where $C(S)$ is the sequence of linguistic content tokens in sentence $S$.
+where $C(S)$ is the sequence of linguistic content tokens (non-stopwords, lemmatized, alphabetic) in sentence $S$.
 
 ### 3.2 Pairwise Cosine Similarity
 For two sentences represented by sparse TF-IDF vectors $\mathbf{u}$ and $\mathbf{v}$:
-$$\text{sim}(\mathbf{u}, \mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\| \times \|\mathbf{v}\|} = \frac{\sum_{t \in \mathbf{u} \cap \mathbf{v}} u_t v_t}{\sqrt{\sum_{t} u_t^2} \sqrt{\sum_{t} v_t^2}}$$
-- If $\|\mathbf{u}\| = 0$ or $\|\mathbf{v}\| = 0$, $\text{sim}(\mathbf{u}, \mathbf{v}) = 0.0$.
+$$\text{cosine}(\mathbf{u}, \mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\| \times \|\mathbf{v}\|} = \frac{\sum_{t \in \mathbf{u} \cap \mathbf{v}} u_t v_t}{\sqrt{\sum_{t} u_t^2} \sqrt{\sum_{t} v_t^2}}$$
+- If $\|\mathbf{u}\| = 0$ or $\|\mathbf{v}\| = 0$, $\text{cosine}(\mathbf{u}, \mathbf{v}) = 0.0$ (safe zero-vector handling).
 - Edge weights satisfy symmetry: $W[i][j] = W[j][i]$.
 - No self-loops: $W[i][i] = 0.0$.
+- All edge weights are non-negative: $W[i][j] \ge 0.0$.
 
 ### 3.3 PageRank Formulation with Dangling Node Handling
 For sentence node $S_i$:
 $$\text{PR}(S_i) = \frac{1 - d}{N} + d \left( \sum_{j \notin D, j \ne i} \frac{W[j][i]}{\sum_k W[j][k]} \text{PR}(S_j) + \frac{\sum_{j \in D} \text{PR}(S_j)}{N} \right)$$
 Where:
-- $d$: Damping factor ($d = 0.85$), representing the probability of continuing a random walk versus jumping to an arbitrary sentence.
+- $d$: Damping factor ($d = 0.85$).
 - $N$: Total number of sentences in the article.
-- $D = \{j \mid \sum_k W[j][k] = 0\}$: The set of dangling nodes (sentences with zero outgoing similarity edges). Dangling mass is distributed uniformly ($1/N$) to prevent probability leakage.
+- $D = \{j \mid \sum_k W[j][k] = 0\}$: The set of dangling nodes (sentences with zero outgoing similarity edges). Dangling mass is distributed uniformly ($1/N$) across all nodes, guaranteeing conservation of total probability mass ($\sum_i \text{PR}(S_i) = 1.0$).
 
 ### 3.4 Convergence Criterion
-Power iterations update the PageRank vector until the $L_1$ norm difference falls below the convergence threshold $\tau$:
+Power iterations update the PageRank vector until the $L_1$ norm difference satisfies:
 $$\sum_{i=1}^N |\text{PR}^{(t+1)}(S_i) - \text{PR}^{(t)}(S_i)| < \tau \quad (\tau = 10^{-6})$$
 or when the iteration count reaches $\text{max\_iterations} = 100$.
 
 ---
 
-## 4. Implementation Architecture
+## 4. Implementation Details
 
-The TextRank pipeline in `summarization/textrank.py` contains the following core methods:
-- `calculate_tf()`, `calculate_df()`, `calculate_idf()`: Deterministic sparse term-frequency extraction.
+The implementation in `summarization/textrank.py` follows a clean, modular structure:
+- `calculate_tf()`, `calculate_df()`, `calculate_idf()`: First-principles sparse term-frequency statistics.
 - `build_sentence_vectors()`: Generates sparse TF-IDF dictionaries per sentence.
-- `cosine_similarity()`: Fast intersection dot product and $L_2$ norm evaluation.
+- `cosine_similarity()`: Sparse dot-product and norm evaluation with zero-magnitude protection.
 - `build_similarity_matrix()`: Symmetric $N \times N$ matrix construction with zero diagonal.
-- `calculate_pagerank()`: Explicit manual PageRank power iteration with dangling mass conservation.
+- `calculate_pagerank()`: Explicit manual PageRank power iteration with uniform dangling mass redistribution.
 - `rank_sentences()`: Descending PageRank sorting with deterministic earlier-index tie-breaking.
 - `select_top_sentences()`: Top-$K$ selection restored to original chronological sentence index.
-- `batch_summarize_file()`: High-throughput streaming batch pipeline for large datasets.
+- `batch_summarize_file()`: High-throughput streaming batch pipeline reading Phase 2 preprocessed JSONL directly without redundant re-preprocessing.
 
 ---
 
@@ -87,33 +91,58 @@ The TextRank pipeline in `summarization/textrank.py` contains the following core
 | **Dataset** | CNN/DailyMail v3.0.0 | Academic benchmark |
 | **Split** | Test set | Random seed 42 |
 | **Article Count** | 1,000 articles | Deterministic sample established in Phase 1 |
-| **Default Summary Length ($K$)** | 3 sentences | Standard initial baseline configuration |
-| **Damping Factor ($d$)** | 0.85 | Classical PageRank teleportation parameter |
-| **Max Iterations** | 100 | Convergence cap |
+| **Summary Length ($K$)** | 3 sentences | Standard initial baseline configuration |
+| **Damping Factor ($d$)** | 0.85 | Classical PageRank parameter |
+| **Max Iterations** | 100 | Convergence iteration limit |
 | **Tolerance ($\tau$)** | $1 \times 10^{-6}$ | $L_1$ convergence threshold |
+| **Tie-Breaking** | Lower sentence index | Deterministic reproducibility |
+| **Self-Loops** | Excluded ($W[i][i] = 0$) | Prevents artificial self-endorsement |
+| **Dangling Nodes** | Uniform ($1/N$) | Preserves total probability mass |
 
 ---
 
-## 6. Hand-Calculated Graph Example
+## 6. Verified Hand-Calculated Graph Example
 
-Consider a small 3-sentence document:
-- **$S_0$**: `"cats chase mice"` $\rightarrow$ `['cats', 'chase', 'mice']`
-- **$S_1$**: `"cats hunt mice"` $\rightarrow$ `['cats', 'hunt', 'mice']`
-- **$S_2$**: `"football teams won matches"` $\rightarrow$ `['football', 'teams', 'won', 'matches']`
+To illustrate the exact mechanics of graph construction and PageRank scoring, consider a 3-sentence document ($N = 3$):
+- **$S_0$**: `"cats chase mice"` $\rightarrow C(S_0) = \text{['cats', 'chase', 'mice']}$ (3 tokens)
+- **$S_1$**: `"cats hunt mice"` $\rightarrow C(S_1) = \text{['cats', 'hunt', 'mice']}$ (3 tokens)
+- **$S_2$**: `"football teams won matches"` $\rightarrow C(S_2) = \text{['football', 'teams', 'won', 'matches']}$ (4 tokens)
 
-1. **Vocabulary Overlap**:
-   - $S_0$ and $S_1$ share `cats` and `mice`.
-   - $S_2$ shares zero content terms with $S_0$ and $S_1$.
-2. **Similarity Matrix**:
-   $$W = \begin{bmatrix} 0.0 & 0.67 & 0.0 \\ 0.67 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 \end{bmatrix}$$
-3. **Graph Topology**:
-   $S_0 \leftrightarrow S_1$ forms a mutually endorsing connected component, while $S_2$ is an isolated dangling node.
-4. **PageRank Distribution**:
-   $S_0$ and $S_1$ receive higher centrality scores than the disconnected $S_2$, correctly identifying the dominant theme.
+### 6.1 TF-IDF Vectors
+- **Document Frequencies**:
+  $\text{DF}(\text{cats}) = 2, \text{DF}(\text{mice}) = 2, \text{DF}(\text{chase}) = 1, \text{DF}(\text{hunt}) = 1$, and all $S_2$ terms have $\text{DF} = 1$.
+- **Inverse Document Frequencies** ($\text{IDF}(t) = \ln(3 / \text{DF}(t))$):
+  - $\text{IDF}(\text{cats}) = \ln(3/2) \approx 0.405465$
+  - $\text{IDF}(\text{mice}) = \ln(3/2) \approx 0.405465$
+  - $\text{IDF}(\text{chase}) = \text{IDF}(\text{hunt}) = \ln(3/1) \approx 1.098612$
+  - All $S_2$ terms have $\text{IDF} = \ln(3) \approx 1.098612$
+- **Resulting Sparse Vectors**:
+  - $\mathbf{v}_0 = \{\text{cats}: 0.135155, \text{chase}: 0.366204, \text{mice}: 0.135155\}$
+  - $\mathbf{v}_1 = \{\text{cats}: 0.135155, \text{hunt}: 0.366204, \text{mice}: 0.135155\}$
+  - $\mathbf{v}_2 = \{\text{football}: 0.274653, \text{teams}: 0.274653, \text{won}: 0.274653, \text{matches}: 0.274653\}$
+
+### 6.2 Exact Similarity Matrix
+- $S_0$ and $S_1$ share `cats` and `mice`:
+  $$\mathbf{v}_0 \cdot \mathbf{v}_1 = 0.135155^2 + 0.135155^2 \approx 0.036534$$
+  $$\|\mathbf{v}_0\| = \|\mathbf{v}_1\| = \sqrt{0.135155^2 + 0.366204^2 + 0.135155^2} \approx 0.413085$$
+  $$\text{cosine}(\mathbf{v}_0, \mathbf{v}_1) = \frac{0.036534}{0.413085^2} \approx \mathbf{0.214099}$$
+- $S_2$ shares zero terms with $S_0$ and $S_1$, so $\text{cosine}(\mathbf{v}_0, \mathbf{v}_2) = \text{cosine}(\mathbf{v}_1, \mathbf{v}_2) = 0.0$.
+
+$$W = \begin{bmatrix} 0.0 & 0.214099 & 0.0 \\ 0.214099 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 \end{bmatrix}$$
+
+### 6.3 PageRank Centrality
+$S_2$ has row sum 0 and is treated as a dangling node. Iterative PageRank converges in 12 iterations to:
+- $\text{PR}(S_0) = \mathbf{0.465116}$
+- $\text{PR}(S_1) = \mathbf{0.465116}$
+- $\text{PR}(S_2) = \mathbf{0.069768}$
+
+$S_0$ and $S_1$ mutually endorse each other, receiving over $93\%$ of the graph's centrality mass, while the isolated $S_2$ receives only baseline teleportation mass.
 
 ---
 
 ## 7. Five Real CNN/DailyMail Examples
+
+The following records from `dataset/processed/textrank_summaries_1000.jsonl` verify performance on real news articles:
 
 ### Example 1
 - **Article ID**: `f001ec5c4704938247d27a44948eebb37ae98d01`
@@ -169,38 +198,76 @@ Consider a small 3-sentence document:
 
 ## 8. Observations
 
-1. **Suppression of Isolated Rare Tokens (Overcoming Dateline Anomaly)**:
-   In Phase 4 (TF-IDF), dateline sentences like `(CNN)` received artificially high scores because unique tokens yielded high IDF. In TextRank, because `(CNN)` shares no content words with subsequent narrative sentences, its cosine similarity to the rest of the graph is near zero. Consequently, its PageRank is heavily suppressed, and central, highly connected narrative sentences are favored.
+1. **Effect of Graph Connectivity on Rare Tokens**:
+   In Phase 4 (TF-IDF), isolated dateline markers such as `(CNN)` received high scores because unique tokens yielded high IDF values. In TextRank, a sentence containing isolated tokens typically exhibits weak or zero lexical similarity with subsequent sentences. Because PageRank scores reflect incoming edge weights, isolated sentences receive limited graph reinforcement. However, graph connectivity reduces rather than entirely eliminates rare-token influence (e.g., if a dateline sentence also contains common article vocabulary).
 2. **Topical Clustering**:
-   Sentences discussing core events (e.g., the dog *Theia* receiving veterinary care in Example 2) mutually reinforce each other across the graph, driving higher PageRank centrality than tangential details.
+   Sentences sharing core vocabulary (e.g., *dog*, *treatment*, *veterinary* in Example 2) mutually reinforce each other across the graph, elevating their PageRank centrality relative to peripheral sentences.
 3. **Word Count and Sentence Length**:
-   Mean summary word count for TextRank 3-sentence extraction is **69.72 words**, compared to **21.65 words** in TF-IDF and **43.51 words** in Frequency summarization. Because sentences with more content tokens tend to form multiple similarity edges across the document, TextRank naturally extracts more comprehensive, informative sentences.
+   Under the implemented TextRank configuration, the selected 3-sentence summaries contained **69.72 words on average**, compared to **43.51 words** for Frequency summarization and **21.65 words** for TF-IDF summarization across the same 1,000 articles. Sentences with higher content token counts tend to participate in more non-zero similarity edges, which can lead to higher overall graph connectivity.
 
 ---
 
 ## 9. Academic Limitations
 
 1. **Lexical Overlap Dependency**:
-   Cosine similarity relies entirely on identical lexical tokens (or lemmas). Semantic equivalents (e.g., *"doctor"* vs *"physician"*, *"treat"* vs *"therapy"*) are treated as having zero similarity unless captured by shared vocabulary.
-2. **Coreference and Anaphora Blindness**:
-   Extracted sentences may contain unresolved pronouns (*"he"*, *"they"*, *"that"*) when their antecedent sentence is not selected.
-3. **Computational Complexity**:
-   Constructing an $N \times N$ similarity matrix scales quadratically as $\mathcal{O}(N^2)$, making pure graph algorithms more computationally expensive than linear frequency counts for long articles.
+   Cosine similarity relies entirely on shared lexical content tokens and lemmas. Semantic equivalents (e.g., *"doctor"* vs *"physician"*, *"treat"* vs *"therapy"*) have zero similarity unless captured by shared vocabulary.
+2. **Coreference / Anaphora Blindness**:
+   The method does not resolve pronouns (*"he"*, *"they"*, *"that"*). A high-centrality sentence may refer to entities introduced in non-selected prior sentences.
+3. **Pairwise Comparison Complexity**:
+   Constructing the similarity matrix requires evaluating every unique sentence pair:
+   $$\frac{N(N - 1)}{2} \text{ comparisons}$$
+   Consequently, graph construction scales as $\mathcal{O}(N^2)$ with the number of sentences $N$.
 4. **Discourse Order Disconnect**:
-   While selected sentences are restored to chronological order, TextRank evaluates sentences as an unordered bag of nodes, without modeling rhetorical structure (e.g., Problem-Solution, Claim-Evidence).
+   While selected sentences are restored to original chronological order, TextRank evaluates sentences as an unordered set of nodes without modeling narrative or rhetorical structure.
+5. **Extractive Limitation**:
+   TextRank selects existing sentences verbatim; it cannot rephrase, synthesize, or compress sentences.
 
 ---
 
-## 10. Reproducibility
+## 10. Performance and Complexity
 
-The 1,000-article baseline was generated using the following command:
+### 10.1 Computational Complexity
+- **Sentence-pair similarity construction**: $\mathcal{O}(N^2 \cdot |V|)$ where $N$ is the number of sentences and $|V|$ is the average number of unique terms per sentence pair.
+- **PageRank iteration**: $\mathcal{O}(I \cdot |E|)$ where $I$ is the number of power iterations until convergence (mean: 26.52) and $|E| \le N^2$ is the number of non-zero similarity edges.
+
+### 10.2 Measured Benchmark (Local Run)
+- **Total Articles**: 1,000
+- **Total Sentences Selected**: 3,000 (3.0 per article)
+- **Average PageRank Iterations to Convergence**: 26.52
+- **Processing Time**: 7.86 seconds
+- **Throughput**: 127.16 articles / second
+
+*(Note: Measured runtime reflects local execution on this specific workstation and hardware environment; it illustrates computational feasibility rather than absolute hardware-independent performance).*
+
+---
+
+## 11. Relationship to Phases 3 and 4
+
+This project establishes three distinct classical extractive summarization baselines:
+
+1. **Phase 3 (Frequency)**:
+   Scored sentences by overall term frequency across the entire article ($\text{NF}(w) = \text{freq}(w)/\max$). Favors globally recurrent topical keywords.
+2. **Phase 4 (TF-IDF)**:
+   Scored sentences by length-normalized term distinctiveness ($\text{TF} \times \text{IDF}$). Favors informative, locally distinctive vocabulary within the article.
+3. **Phase 5 (TextRank)**:
+   Scores sentences by global graph centrality via PageRank on a lexical similarity network. Favors sentences endorsed by mutual content overlap across the document.
+
+---
+
+## 12. Reproducibility
+
+The 1,000-article baseline was generated using:
 
 ```powershell
 python -m summarization.textrank --dataset "dataset/processed/cnn_dailymail_test_1000_processed.jsonl" --num-sentences 3
 ```
 
-- **Output File**: [`dataset/processed/textrank_summaries_1000.jsonl`](file:///D:/nlp%20project/dataset/processed/textrank_summaries_1000.jsonl)
-- **Total Articles**: 1,000
-- **Total Sentences Selected**: 3,000 (3.0 per article)
-- **Average PageRank Iterations to Convergence**: 26.52 iterations
-- **Processing Time**: 7.86 seconds (127.16 articles/sec)
+- **Output File**: `dataset/processed/textrank_summaries_1000.jsonl`
+- **Output Record Count**: 1,000 JSON lines
+
+---
+
+## 13. Phase 6 Evaluation Note
+
+> [!IMPORTANT]
+> Formal quantitative evaluation (ROUGE-1, ROUGE-2, and ROUGE-L) comparing Frequency, TF-IDF, and TextRank summarization will be conducted in **Phase 6**. No claim is made at this stage regarding which algorithm achieves superior summarization quality.
