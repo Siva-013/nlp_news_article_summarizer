@@ -1,12 +1,32 @@
 /**
  * Central API fetch wrapper.
  * Reads VITE_API_BASE_URL from the Vite environment.
+ * Attaches the saved JWT (if any) to every request; a 401 response clears
+ * the session and notifies the app via the 'lexica:unauthorized' event.
  */
 
 const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const TOKEN_KEY = 'lexica_token';
 
 export function getApiBase() {
   return BASE.replace(/\/$/, '');
+}
+
+export function getStoredToken() {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function storeToken(token) {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* storage unavailable — session stays in memory only */
+  }
 }
 
 export class ApiError extends Error {
@@ -33,19 +53,40 @@ function formatDetail(body, fallback) {
 }
 
 export async function apiFetch(path, options = {}) {
-  const { headers, ...rest } = options;
+  const { headers, skipAuth, ...rest } = options;
   const url = `${getApiBase()}${path}`;
+
+  const authHeaders = {};
+  if (!skipAuth) {
+    const token = getStoredToken();
+    if (token) authHeaders.Authorization = `Bearer ${token}`;
+  }
+
   let res;
   try {
     res = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders,
         ...(headers || {}),
       },
       ...rest,
     });
   } catch {
     throw new ApiError(0, 'Network error — is the FastAPI backend running?');
+  }
+
+  if (res.status === 401 && !skipAuth) {
+    storeToken(null);
+    window.dispatchEvent(new CustomEvent('lexica:unauthorized'));
+    let detail = 'Session expired. Please sign in again.';
+    try {
+      const body = await res.json();
+      detail = formatDetail(body, detail);
+    } catch {
+      /* ignore parse error */
+    }
+    throw new ApiError(401, detail);
   }
 
   if (!res.ok) {

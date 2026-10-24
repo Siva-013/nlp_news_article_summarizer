@@ -6,7 +6,9 @@ CRUD operations for article history persistence (Phase 9)
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from api.dependencies import get_db
+from typing import Any, Dict, Optional
+
+from api.dependencies import get_db, get_current_user
 from api.schemas import (
     ArticleHistoryCreateRequest,
     ArticleHistoryResponse,
@@ -27,6 +29,7 @@ router = APIRouter(prefix="/history", tags=["Article History"])
 def create_article_history_entry(
     request: ArticleHistoryCreateRequest,
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
         new_id = db.save_article_history(
@@ -38,8 +41,9 @@ def create_article_history_entry(
             extracted_vocabulary=request.extracted_vocabulary,
             new_vocabulary=request.new_vocabulary,
             metadata=request.metadata,
+            user_id=user["id"],
         )
-        record = db.get_article_history(new_id)
+        record = db.get_article_history(new_id, user_id=user["id"])
         if not record:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -67,10 +71,11 @@ def list_article_history(
     offset: int = Query(0, ge=0, description="Page offset"),
     method: Optional[str] = Query(None, description="Filter by summarization method"),
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
-        total = db.count_article_history(method=method)
-        items = db.list_article_history(limit=limit, offset=offset, method=method)
+        total = db.count_article_history(method=method, user_id=user["id"])
+        items = db.list_article_history(limit=limit, offset=offset, method=method, user_id=user["id"])
         return {"total": total, "limit": limit, "offset": offset, "items": items}
     except Exception as exc:
         raise HTTPException(
@@ -91,10 +96,11 @@ def search_article_history(
     limit: int = Query(50, ge=1, le=500, description="Page limit"),
     offset: int = Query(0, ge=0, description="Page offset"),
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
-        total = db.count_search_article_history(query=q)
-        items = db.search_article_history(query=q, limit=limit, offset=offset)
+        total = db.count_search_article_history(query=q, user_id=user["id"])
+        items = db.search_article_history(query=q, limit=limit, offset=offset, user_id=user["id"])
         return {"total": total, "limit": limit, "offset": offset, "items": items}
     except Exception as exc:
         raise HTTPException(
@@ -113,8 +119,9 @@ def search_article_history(
 def get_article_history(
     history_id: int,
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
-    record = db.get_article_history(history_id)
+    record = db.get_article_history(history_id, user_id=user["id"])
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -132,8 +139,9 @@ def get_article_history(
 def delete_article_history(
     history_id: int,
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
-    deleted = db.delete_article_history(history_id)
+    deleted = db.delete_article_history(history_id, user_id=user["id"])
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -6,12 +6,15 @@ GET  /api/v1/speech/voices
 """
 
 from pathlib import Path
+from typing import Any, Dict
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 
 from api.dependencies import (
-    get_tts_engine,
     get_audio_dir,
+    get_current_user,
+    get_tts_engine,
     validate_safe_audio_id,
 )
 from api.schemas import (
@@ -37,6 +40,7 @@ def synthesize_speech(
     request: SpeechSynthesizeRequest,
     engine: TextToSpeechEngine = Depends(get_tts_engine),
     audio_dir: Path = Depends(get_audio_dir),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
         result = run_speech_synthesis(
@@ -67,6 +71,7 @@ def synthesize_speech(
 def get_audio_file(
     audio_id: str,
     audio_dir: Path = Depends(get_audio_dir),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     # Validate audio ID to prevent path traversal
     try:
@@ -102,6 +107,7 @@ def get_audio_file(
 )
 def list_available_voices(
     engine: TextToSpeechEngine = Depends(get_tts_engine),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
         raw_voices = engine.get_available_voices()

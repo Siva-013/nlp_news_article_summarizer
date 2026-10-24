@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { useHealth } from '../../context/HealthContext.jsx';
 import './TopBar.css';
 
@@ -28,6 +29,21 @@ function HealthPill() {
   );
 }
 
+function UserChip() {
+  const { user, logout } = useAuth();
+  if (!user) return null;
+  const initial = (user.username || '?').charAt(0).toUpperCase();
+  return (
+    <div className="user-chip">
+      <span className="user-chip__avatar" aria-hidden="true">{initial}</span>
+      <span className="user-chip__name">{user.username}</span>
+      <button type="button" className="user-chip__signout" onClick={logout} title="Sign out">
+        Sign out
+      </button>
+    </div>
+  );
+}
+
 export function TopBar() {
   return (
     <header className="topbar">
@@ -53,6 +69,7 @@ export function TopBar() {
 
         <div className="topbar__right">
           <HealthPill />
+          <UserChip />
         </div>
       </div>
     </header>

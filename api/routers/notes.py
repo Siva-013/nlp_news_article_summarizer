@@ -6,7 +6,9 @@ CRUD operations for learner notes persistence (Phase 9)
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from api.dependencies import get_db
+from typing import Any, Dict
+
+from api.dependencies import get_db, get_current_user
 from api.schemas import (
     NoteCreateRequest,
     NoteUpdateRequest,
@@ -28,6 +30,7 @@ router = APIRouter(prefix="/notes", tags=["Vocabulary Notes"])
 def create_vocabulary_note(
     request: NoteCreateRequest,
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
         new_id = db.create_note(
@@ -35,8 +38,9 @@ def create_vocabulary_note(
             term=request.term,
             example_sentence=request.example_sentence,
             article_history_id=request.article_history_id,
+            user_id=user["id"],
         )
-        record = db.get_note(new_id)
+        record = db.get_note(new_id, user_id=user["id"])
         if not record:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -65,14 +69,16 @@ def list_vocabulary_notes(
     term: Optional[str] = Query(None, description="Filter by exact term"),
     article_history_id: Optional[int] = Query(None, description="Filter by article history ID"),
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
-        total = db.count_notes(term=term, article_history_id=article_history_id)
+        total = db.count_notes(term=term, article_history_id=article_history_id, user_id=user["id"])
         items = db.list_notes(
             limit=limit,
             offset=offset,
             term=term,
             article_history_id=article_history_id,
+            user_id=user["id"],
         )
         return {"total": total, "limit": limit, "offset": offset, "items": items}
     except Exception as exc:
@@ -94,10 +100,11 @@ def search_vocabulary_notes(
     limit: int = Query(20, ge=1, le=200, description="Page limit"),
     offset: int = Query(0, ge=0, description="Page offset"),
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
-        total = db.count_search_notes(query=q)
-        items = db.search_notes(query=q, limit=limit, offset=offset)
+        total = db.count_search_notes(query=q, user_id=user["id"])
+        items = db.search_notes(query=q, limit=limit, offset=offset, user_id=user["id"])
         return {"total": total, "limit": limit, "offset": offset, "items": items}
     except Exception as exc:
         raise HTTPException(
@@ -116,8 +123,9 @@ def search_vocabulary_notes(
 def get_vocabulary_note(
     note_id: int,
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
-    record = db.get_note(note_id)
+    record = db.get_note(note_id, user_id=user["id"])
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -137,6 +145,7 @@ def update_vocabulary_note(
     note_id: int,
     request: NoteUpdateRequest,
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
     try:
         updated = db.update_note(
@@ -148,13 +157,14 @@ def update_vocabulary_note(
             clear_term=request.clear_term,
             clear_example=request.clear_example,
             clear_article_history=request.clear_article_history,
+            user_id=user["id"],
         )
         if not updated:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Vocabulary note with ID {note_id} not found.",
             )
-        return db.get_note(note_id)
+        return db.get_note(note_id, user_id=user["id"])
     except HTTPException:
         raise
     except ValueError as exc:
@@ -175,8 +185,9 @@ def update_vocabulary_note(
 def delete_vocabulary_note(
     note_id: int,
     db: NotesHistoryManager = Depends(get_db),
+    user: Dict[str, Any] = Depends(get_current_user),
 ):
-    deleted = db.delete_note(note_id)
+    deleted = db.delete_note(note_id, user_id=user["id"])
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

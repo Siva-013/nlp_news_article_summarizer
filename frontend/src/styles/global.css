@@ -270,3 +270,34 @@ a {
     scroll-behavior: auto !important;
   }
 }
+
+/* Session restore splash */
+.app-splash {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  color: var(--text-3);
+  font-size: 0.88rem;
+}
+
+.app-splash__glyph {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: var(--gradient-brand);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: #0a0f1a;
+  box-shadow: var(--glow-accent);
+  animation: splash-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes splash-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.94); opacity: 0.75; }
+}

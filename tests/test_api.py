@@ -149,6 +149,8 @@ def mock_tts():
 def client(test_db, test_audio_dir, mock_tts):
     """
     TestClient with dependencies overridden for complete database and filesystem isolation.
+    A default user account is created and authenticated so every API call in
+    this suite runs with a valid Bearer token (all /api/v1 routes require auth).
     """
     def override_get_db():
         yield test_db
@@ -164,6 +166,18 @@ def client(test_db, test_audio_dir, mock_tts):
     app.dependency_overrides[get_audio_dir] = override_get_audio_dir
 
     with TestClient(app) as test_client:
+        # Register + login the default test user, then attach the token globally.
+        test_client.post(
+            "/api/v1/auth/register",
+            json={"username": "default_user", "password": "testpassword123"},
+        )
+        login = test_client.post(
+            "/api/v1/auth/login",
+            json={"username": "default_user", "password": "testpassword123"},
+        )
+        assert login.status_code == 200, login.text
+        token = login.json()["access_token"]
+        test_client.headers.update({"Authorization": f"Bearer {token}"})
         yield test_client
 
     app.dependency_overrides.clear()

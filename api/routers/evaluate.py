@@ -3,7 +3,11 @@ Evaluation Router
 POST /api/v1/evaluate
 """
 
-from fastapi import APIRouter, HTTPException, status
+from typing import Any, Dict
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from api.dependencies import get_current_user
 
 from api.schemas import EvaluateRequest, EvaluateResponse
 from api.services import run_rouge_evaluation
@@ -18,7 +22,10 @@ router = APIRouter(prefix="/evaluate", tags=["Evaluation"])
     summary="Compute ROUGE Evaluation Metrics",
     description="Evaluate precision, recall, and F1 scores for ROUGE-1, ROUGE-2, and ROUGE-L between candidate and reference summaries (Phase 6).",
 )
-def evaluate_summary(request: EvaluateRequest):
+def evaluate_summary(
+    request: EvaluateRequest,
+    user: Dict[str, Any] = Depends(get_current_user),
+):
     try:
         result = run_rouge_evaluation(
             candidate_summary=request.candidate_summary,

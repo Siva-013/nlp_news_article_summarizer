@@ -19,6 +19,7 @@ from api.routers.history import router as history_router
 from api.routers.notes import router as notes_router
 from api.routers.speech import router as speech_router
 from api.routers.evaluate import router as evaluate_router
+from api.routers.auth import router as auth_router
 from database.notes_history import NotesHistoryManager
 
 
@@ -61,6 +62,7 @@ api_v1_router.include_router(history_router)
 api_v1_router.include_router(notes_router)
 api_v1_router.include_router(speech_router)
 api_v1_router.include_router(evaluate_router)
+api_v1_router.include_router(auth_router)
 
 app.include_router(api_v1_router)
 
@@ -89,6 +91,8 @@ def read_root():
             "speech_synthesize": "/api/v1/speech/synthesize",
             "speech_voices": "/api/v1/speech/voices",
             "evaluate": "/api/v1/evaluate",
+            "auth_register": "/api/v1/auth/register",
+            "auth_login": "/api/v1/auth/login",
             "health": "/health",
         },
     }

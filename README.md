@@ -118,9 +118,9 @@ python -m summarization.frequency --batch --input dataset/processed/cnn_dailymai
 python -m pytest tests/ -v
 ```
 
-All 220 test cases pass across dataset acquisition, preprocessing, the three summarizers,
+All 236 test cases pass across dataset acquisition, preprocessing, the three summarizers,
 vocabulary extraction and new-word detection, notes/history persistence, speech synthesis,
-and the FastAPI layer.
+user authentication, and the FastAPI layer.
 
 ### 5. Running the Full Application (API + Web UI)
 
@@ -136,6 +136,12 @@ npm run dev
 ```
 
 The web UI ("Lexica") is a dark research-console front end with six workspaces:
+
+- **User accounts** — every visitor signs in with their own username and password.
+  Passwords are bcrypt-hashed; sessions use signed JWT bearer tokens. Notes and
+  article history are stored per user — nobody can read or modify another
+  user's data. Set `JWT_SECRET` in the environment for production-grade token
+  signing (a documented dev fallback is used when unset).
 
 - **Summarize** — extractive summarization with Frequency / TF–IDF / TextRank,
   side-by-side comparison of all three methods, per-sentence scores, top-word

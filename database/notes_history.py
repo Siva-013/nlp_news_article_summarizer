@@ -100,10 +100,25 @@ class NotesHistoryManager:
     def initialize_schema(self) -> None:
         """
         Create tables and indexes if they do not already exist.
+        Includes lightweight migration: adds user_id columns to existing
+        article_history / vocabulary_notes tables when upgrading an older
+        database file (existing rows keep user_id NULL = unassigned legacy data).
         """
         conn = self.get_connection()
         try:
             with conn:
+                # 0. User accounts table
+                conn.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                        password_hash TEXT NOT NULL,
+                        created_at TEXT NOT NULL
+                    );
+                    """
+                )
+
                 # 1. Article History table
                 conn.execute(
                     """
@@ -117,10 +132,19 @@ class NotesHistoryManager:
                         processing_timestamp TEXT NOT NULL,
                         extracted_vocabulary TEXT,
                         new_vocabulary TEXT,
-                        metadata TEXT
+                        metadata TEXT,
+                        user_id INTEGER
                     );
                     """
                 )
+
+                # Migration: add user_id to pre-existing article_history tables
+                ah_columns = {
+                    row["name"]
+                    for row in conn.execute("PRAGMA table_info(article_history);").fetchall()
+                }
+                if "user_id" not in ah_columns:
+                    conn.execute("ALTER TABLE article_history ADD COLUMN user_id INTEGER;")
 
                 # Indexes for article_history
                 conn.execute(
@@ -131,6 +155,9 @@ class NotesHistoryManager:
                 )
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_ah_timestamp ON article_history(processing_timestamp DESC);"
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_ah_user ON article_history(user_id);"
                 )
 
                 # 2. Vocabulary Notes table
@@ -144,10 +171,19 @@ class NotesHistoryManager:
                         article_history_id INTEGER,
                         created_at TEXT NOT NULL,
                         updated_at TEXT NOT NULL,
+                        user_id INTEGER,
                         FOREIGN KEY(article_history_id) REFERENCES article_history(id) ON DELETE SET NULL
                     );
                     """
                 )
+
+                # Migration: add user_id to pre-existing vocabulary_notes tables
+                notes_columns = {
+                    row["name"]
+                    for row in conn.execute("PRAGMA table_info(vocabulary_notes);").fetchall()
+                }
+                if "user_id" not in notes_columns:
+                    conn.execute("ALTER TABLE vocabulary_notes ADD COLUMN user_id INTEGER;")
 
                 # Indexes for vocabulary_notes
                 conn.execute(
@@ -159,6 +195,93 @@ class NotesHistoryManager:
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_notes_created_at ON vocabulary_notes(created_at DESC);"
                 )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_notes_user ON vocabulary_notes(user_id);"
+                )
+        finally:
+            if not self.is_memory:
+                conn.close()
+
+    # =========================================================================
+    # USER ACCOUNT OPERATIONS
+    # =========================================================================
+
+    def create_user(self, username: str, password_hash: str) -> int:
+        """
+        Create a new user account.
+
+        Args:
+            username: Unique username (case-insensitive uniqueness enforced).
+            password_hash: Pre-hashed password string (never store plaintext).
+
+        Returns:
+            The new user's integer ID.
+
+        Raises:
+            ValueError: If the username is already taken or inputs are invalid.
+        """
+        if not username or not isinstance(username, str) or not username.strip():
+            raise ValueError("Username must be a non-empty string.")
+        if not password_hash or not isinstance(password_hash, str):
+            raise ValueError("Password hash must be a non-empty string.")
+
+        conn = self.get_connection()
+        try:
+            with conn:
+                cursor = conn.execute(
+                    """
+                    INSERT INTO users (username, password_hash, created_at)
+                    VALUES (?, ?, ?);
+                    """,
+                    (username.strip(), password_hash, get_utc_now_iso()),
+                )
+                return int(cursor.lastrowid)
+        except sqlite3.IntegrityError as exc:
+            raise ValueError(f"Username '{username.strip()}' is already taken.") from exc
+        finally:
+            if not self.is_memory:
+                conn.close()
+
+    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """Fetch a user account by username (case-insensitive). Never returns the hash."""
+        if not username or not isinstance(username, str):
+            return None
+        conn = self.get_connection()
+        try:
+            row = conn.execute(
+                "SELECT id, username, password_hash, created_at FROM users WHERE username = ? COLLATE NOCASE;",
+                (username.strip(),),
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "id": int(row["id"]),
+                "username": row["username"],
+                "password_hash": row["password_hash"],
+                "created_at": row["created_at"],
+            }
+        finally:
+            if not self.is_memory:
+                conn.close()
+
+    def get_user_by_id(self, user_id: int) -> Optional[Dict[str, Any]]:
+        """Fetch a user account by ID. Never returns the hash."""
+        if not isinstance(user_id, int) or user_id <= 0:
+            return None
+        conn = self.get_connection()
+        try:
+            row = conn.execute(
+                "SELECT id, username, password_hash, created_at FROM users WHERE id = ?;",
+                (user_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "id": int(row["id"]),
+                "username": row["username"],
+                "password_hash": row["password_hash"],
+                "created_at": row["created_at"],
+            }
         finally:
             if not self.is_memory:
                 conn.close()
@@ -178,6 +301,7 @@ class NotesHistoryManager:
         extracted_vocabulary: Optional[Union[List[Any], Dict[str, Any], str]] = None,
         new_vocabulary: Optional[Union[List[Any], Dict[str, Any], str]] = None,
         metadata: Optional[Union[Dict[str, Any], str]] = None,
+        user_id: Optional[int] = None,
     ) -> int:
         """
         Save an article summarization record and its associated vocabulary into history.
@@ -192,6 +316,7 @@ class NotesHistoryManager:
             extracted_vocabulary: Vocabulary items from Phase 7 (list, dict, or JSON string).
             new_vocabulary: New vocabulary items from Phase 8 (list, dict, or JSON string).
             metadata: Evaluation metrics, parameters, or metadata (dict or JSON string).
+            user_id: Owning user account ID (optional; None = unassigned legacy row).
 
         Returns:
             The unique integer history ID of the newly saved record.
@@ -234,8 +359,9 @@ class NotesHistoryManager:
                         processing_timestamp,
                         extracted_vocabulary,
                         new_vocabulary,
-                        metadata
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                        metadata,
+                        user_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                     """,
                     (
                         source_article_id,
@@ -247,6 +373,7 @@ class NotesHistoryManager:
                         vocab_json,
                         new_vocab_json,
                         meta_json,
+                        user_id,
                     ),
                 )
                 return int(cursor.lastrowid)
@@ -254,12 +381,18 @@ class NotesHistoryManager:
             if not self.is_memory:
                 conn.close()
 
-    def get_article_history(self, history_id: int) -> Optional[Dict[str, Any]]:
+    def get_article_history(
+        self,
+        history_id: int,
+        user_id: Optional[int] = None,
+    ) -> Optional[Dict[str, Any]]:
         """
         Retrieve an article history entry by its unique history ID.
 
         Args:
             history_id: Unique integer primary key.
+            user_id: When provided, only rows owned by this user are returned
+                     (another user's row is reported as not found).
 
         Returns:
             Dictionary with history fields and deserialized JSON structures, or None.
@@ -273,7 +406,7 @@ class NotesHistoryManager:
                 """
                 SELECT id, source_article_id, title, article_text, summary,
                        method, processing_timestamp, extracted_vocabulary,
-                       new_vocabulary, metadata
+                       new_vocabulary, metadata, user_id
                 FROM article_history
                 WHERE id = ?;
                 """,
@@ -281,6 +414,8 @@ class NotesHistoryManager:
             )
             row = cursor.fetchone()
             if not row:
+                return None
+            if user_id is not None and row["user_id"] != user_id:
                 return None
             return self._format_article_history_row(row)
         finally:
@@ -292,6 +427,7 @@ class NotesHistoryManager:
         limit: int = 20,
         offset: int = 0,
         method: Optional[str] = None,
+        user_id: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
         List article history records with pagination and optional method filtering.
@@ -300,6 +436,7 @@ class NotesHistoryManager:
             limit: Maximum number of records to return.
             offset: Number of records to skip.
             method: Filter by summarization method (e.g. 'textrank', 'tfidf', 'frequency').
+            user_id: When provided, only records owned by this user are returned.
 
         Returns:
             List of formatted history entry dictionaries.
@@ -307,52 +444,59 @@ class NotesHistoryManager:
         limit = max(1, int(limit))
         offset = max(0, int(offset))
 
+        conditions = []
+        params: List[Any] = []
+        if method:
+            conditions.append("method = ?")
+            params.append(method.strip().lower())
+        if user_id is not None:
+            conditions.append("user_id = ?")
+            params.append(user_id)
+        where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
         conn = self.get_connection()
         try:
-            if method:
-                cursor = conn.execute(
-                    """
-                    SELECT id, source_article_id, title, article_text, summary,
-                           method, processing_timestamp, extracted_vocabulary,
-                           new_vocabulary, metadata
-                    FROM article_history
-                    WHERE method = ?
-                    ORDER BY processing_timestamp DESC, id DESC
-                    LIMIT ? OFFSET ?;
-                    """,
-                    (method.strip().lower(), limit, offset),
-                )
-            else:
-                cursor = conn.execute(
-                    """
-                    SELECT id, source_article_id, title, article_text, summary,
-                           method, processing_timestamp, extracted_vocabulary,
-                           new_vocabulary, metadata
-                    FROM article_history
-                    ORDER BY processing_timestamp DESC, id DESC
-                    LIMIT ? OFFSET ?;
-                    """,
-                    (limit, offset),
-                )
-
+            cursor = conn.execute(
+                f"""
+                SELECT id, source_article_id, title, article_text, summary,
+                       method, processing_timestamp, extracted_vocabulary,
+                       new_vocabulary, metadata, user_id
+                FROM article_history
+                {where_clause}
+                ORDER BY processing_timestamp DESC, id DESC
+                LIMIT ? OFFSET ?;
+                """,
+                (*params, limit, offset),
+            )
             return [self._format_article_history_row(row) for row in cursor.fetchall()]
         finally:
             if not self.is_memory:
                 conn.close()
 
-    def count_article_history(self, method: Optional[str] = None) -> int:
+    def count_article_history(
+        self,
+        method: Optional[str] = None,
+        user_id: Optional[int] = None,
+    ) -> int:
         """
         Count total article history records matching filter.
         """
+        conditions = []
+        params: List[Any] = []
+        if method:
+            conditions.append("method = ?")
+            params.append(method.strip().lower())
+        if user_id is not None:
+            conditions.append("user_id = ?")
+            params.append(user_id)
+        where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
         conn = self.get_connection()
         try:
-            if method:
-                cursor = conn.execute(
-                    "SELECT COUNT(*) FROM article_history WHERE method = ?;",
-                    (method.strip().lower(),),
-                )
-            else:
-                cursor = conn.execute("SELECT COUNT(*) FROM article_history;")
+            cursor = conn.execute(
+                f"SELECT COUNT(*) FROM article_history {where_clause};",
+                tuple(params),
+            )
             return int(cursor.fetchone()[0])
         finally:
             if not self.is_memory:
@@ -363,6 +507,7 @@ class NotesHistoryManager:
         query: str,
         limit: int = 20,
         offset: int = 0,
+        user_id: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
         Search article history across title, article_text, summary, and source_article_id.
@@ -372,6 +517,7 @@ class NotesHistoryManager:
             query: Search string.
             limit: Pagination limit.
             offset: Pagination offset.
+            user_id: When provided, only records owned by this user are searched.
 
         Returns:
             List of matching article history dictionaries.
@@ -384,26 +530,29 @@ class NotesHistoryManager:
         offset = max(0, int(offset))
         param = f"%{cleaned_query}%"
 
+        user_clause = " AND user_id = ?" if user_id is not None else ""
+        user_params: List[Any] = [user_id] if user_id is not None else []
+
         conn = self.get_connection()
         try:
             cursor = conn.execute(
-                """
+                f"""
                 SELECT id, source_article_id, title, article_text, summary,
                        method, processing_timestamp, extracted_vocabulary,
-                       new_vocabulary, metadata
+                       new_vocabulary, metadata, user_id
                 FROM article_history
-                WHERE title LIKE ? OR article_text LIKE ? OR summary LIKE ? OR source_article_id LIKE ?
+                WHERE (title LIKE ? OR article_text LIKE ? OR summary LIKE ? OR source_article_id LIKE ?){user_clause}
                 ORDER BY processing_timestamp DESC, id DESC
                 LIMIT ? OFFSET ?;
                 """,
-                (param, param, param, param, limit, offset),
+                (param, param, param, param, *user_params, limit, offset),
             )
             return [self._format_article_history_row(row) for row in cursor.fetchall()]
         finally:
             if not self.is_memory:
                 conn.close()
 
-    def count_search_article_history(self, query: str) -> int:
+    def count_search_article_history(self, query: str, user_id: Optional[int] = None) -> int:
         """
         Count total article history records matching the search query
         (title, article_text, summary, source_article_id), so search
@@ -413,29 +562,32 @@ class NotesHistoryManager:
         if not cleaned_query:
             return 0
         param = f"%{cleaned_query}%"
+        user_clause = " AND user_id = ?" if user_id is not None else ""
+        user_params: List[Any] = [user_id] if user_id is not None else []
         conn = self.get_connection()
         try:
             cursor = conn.execute(
-                """
+                f"""
                 SELECT COUNT(*) FROM article_history
-                WHERE title LIKE ? OR article_text LIKE ? OR summary LIKE ? OR source_article_id LIKE ?;
+                WHERE (title LIKE ? OR article_text LIKE ? OR summary LIKE ? OR source_article_id LIKE ?){user_clause};
                 """,
-                (param, param, param, param),
+                (param, param, param, param, *user_params),
             )
             return int(cursor.fetchone()[0])
         finally:
             if not self.is_memory:
                 conn.close()
 
-    def delete_article_history(self, history_id: int) -> bool:
+    def delete_article_history(self, history_id: int, user_id: Optional[int] = None) -> bool:
         """
         Delete a single article history entry by ID.
 
         Args:
             history_id: Unique history ID to delete.
+            user_id: When provided, only the owning user's entry can be deleted.
 
         Returns:
-            True if an entry was deleted, False if not found.
+            True if an entry was deleted, False if not found or not owned.
         """
         if not isinstance(history_id, int) or history_id <= 0:
             return False
@@ -443,10 +595,16 @@ class NotesHistoryManager:
         conn = self.get_connection()
         try:
             with conn:
-                cursor = conn.execute(
-                    "DELETE FROM article_history WHERE id = ?;",
-                    (history_id,),
-                )
+                if user_id is not None:
+                    cursor = conn.execute(
+                        "DELETE FROM article_history WHERE id = ? AND user_id = ?;",
+                        (history_id, user_id),
+                    )
+                else:
+                    cursor = conn.execute(
+                        "DELETE FROM article_history WHERE id = ?;",
+                        (history_id,),
+                    )
                 return cursor.rowcount > 0
         finally:
             if not self.is_memory:
@@ -499,6 +657,7 @@ class NotesHistoryManager:
             "extracted_vocabulary": safe_json_loads(row["extracted_vocabulary"]),
             "new_vocabulary": safe_json_loads(row["new_vocabulary"]),
             "metadata": safe_json_loads(row["metadata"]),
+            "user_id": row["user_id"],
         }
 
     # =========================================================================
@@ -512,6 +671,7 @@ class NotesHistoryManager:
         example_sentence: Optional[str] = None,
         article_history_id: Optional[int] = None,
         created_at: Optional[str] = None,
+        user_id: Optional[int] = None,
     ) -> int:
         """
         Create a new vocabulary or general reading note.
@@ -520,11 +680,18 @@ class NotesHistoryManager:
             content: Note text content (required, non-empty).
             term: Associated vocabulary term or phrase (optional).
             example_sentence: Example usage sentence (optional).
-            article_history_id: Associated article history entry ID (optional).
+            article_history_id: Associated article history entry ID (optional;
+                when user_id is provided the referenced entry must belong to
+                the same user).
             created_at: ISO 8601 UTC timestamp string (generated if omitted).
+            user_id: Owning user account ID (optional; None = unassigned legacy row).
 
         Returns:
             The unique integer ID of the created note.
+
+        Raises:
+            ValueError: If content is empty or the referenced article entry
+                does not exist (or belongs to a different user).
         """
         if not content or not isinstance(content, str) or not content.strip():
             raise ValueError("Note content must be a non-empty string.")
@@ -540,16 +707,28 @@ class NotesHistoryManager:
         conn = self.get_connection()
         try:
             with conn:
-                # If article_history_id is supplied, verify it exists to ensure integrity
+                # If article_history_id is supplied, verify it exists — and when
+                # a user context is given, verify it belongs to that same user.
                 if article_history_id is not None:
-                    check = conn.execute(
-                        "SELECT id FROM article_history WHERE id = ?;",
-                        (article_history_id,),
-                    ).fetchone()
-                    if not check:
-                        raise ValueError(
-                            f"Referenced article_history_id {article_history_id} does not exist."
-                        )
+                    if user_id is not None:
+                        check = conn.execute(
+                            "SELECT id FROM article_history WHERE id = ? AND user_id = ?;",
+                            (article_history_id, user_id),
+                        ).fetchone()
+                        if not check:
+                            raise ValueError(
+                                f"Referenced article_history_id {article_history_id} does not exist "
+                                "or belongs to another user."
+                            )
+                    else:
+                        check = conn.execute(
+                            "SELECT id FROM article_history WHERE id = ?;",
+                            (article_history_id,),
+                        ).fetchone()
+                        if not check:
+                            raise ValueError(
+                                f"Referenced article_history_id {article_history_id} does not exist."
+                            )
 
                 cursor = conn.execute(
                     """
@@ -559,8 +738,9 @@ class NotesHistoryManager:
                         example_sentence,
                         article_history_id,
                         created_at,
-                        updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?);
+                        updated_at,
+                        user_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?);
                     """,
                     (
                         cleaned_term,
@@ -569,6 +749,7 @@ class NotesHistoryManager:
                         article_history_id,
                         timestamp,
                         timestamp,
+                        user_id,
                     ),
                 )
                 return int(cursor.lastrowid)
@@ -576,12 +757,13 @@ class NotesHistoryManager:
             if not self.is_memory:
                 conn.close()
 
-    def get_note(self, note_id: int) -> Optional[Dict[str, Any]]:
+    def get_note(self, note_id: int, user_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
         """
         Retrieve a note by its ID.
 
         Args:
             note_id: Unique integer note ID.
+            user_id: When provided, only notes owned by this user are returned.
 
         Returns:
             Dictionary with note fields, or None if not found.
@@ -594,7 +776,7 @@ class NotesHistoryManager:
             cursor = conn.execute(
                 """
                 SELECT id, term, content, example_sentence, article_history_id,
-                       created_at, updated_at
+                       created_at, updated_at, user_id
                 FROM vocabulary_notes
                 WHERE id = ?;
                 """,
@@ -602,6 +784,8 @@ class NotesHistoryManager:
             )
             row = cursor.fetchone()
             if not row:
+                return None
+            if user_id is not None and row["user_id"] != user_id:
                 return None
             return self._format_note_row(row)
         finally:
@@ -614,6 +798,7 @@ class NotesHistoryManager:
         offset: int = 0,
         term: Optional[str] = None,
         article_history_id: Optional[int] = None,
+        user_id: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
         List notes with pagination and optional filtering by term or article.
@@ -623,6 +808,7 @@ class NotesHistoryManager:
             offset: Notes to skip.
             term: Filter by exact vocabulary term (case-insensitive).
             article_history_id: Filter by associated article history ID.
+            user_id: When provided, only notes owned by this user are returned.
 
         Returns:
             List of note dictionaries ordered by created_at DESC, id DESC.
@@ -641,11 +827,15 @@ class NotesHistoryManager:
             conditions.append("article_history_id = ?")
             params.append(article_history_id)
 
+        if user_id is not None:
+            conditions.append("user_id = ?")
+            params.append(user_id)
+
         where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
         sql = f"""
             SELECT id, term, content, example_sentence, article_history_id,
-                   created_at, updated_at
+                   created_at, updated_at, user_id
             FROM vocabulary_notes
             {where_clause}
             ORDER BY created_at DESC, id DESC
@@ -665,6 +855,7 @@ class NotesHistoryManager:
         self,
         term: Optional[str] = None,
         article_history_id: Optional[int] = None,
+        user_id: Optional[int] = None,
     ) -> int:
         """Count total notes matching filter."""
         conditions = []
@@ -677,6 +868,10 @@ class NotesHistoryManager:
         if article_history_id is not None:
             conditions.append("article_history_id = ?")
             params.append(article_history_id)
+
+        if user_id is not None:
+            conditions.append("user_id = ?")
+            params.append(user_id)
 
         where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         sql = f"SELECT COUNT(*) FROM vocabulary_notes {where_clause};"
@@ -694,6 +889,7 @@ class NotesHistoryManager:
         query: str,
         limit: int = 20,
         offset: int = 0,
+        user_id: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
         Search notes across content, term, and example_sentence.
@@ -703,6 +899,7 @@ class NotesHistoryManager:
             query: Search query string.
             limit: Pagination limit.
             offset: Pagination offset.
+            user_id: When provided, only notes owned by this user are searched.
 
         Returns:
             List of matching note dictionaries.
@@ -715,25 +912,28 @@ class NotesHistoryManager:
         offset = max(0, int(offset))
         param = f"%{cleaned}%"
 
+        user_clause = " AND user_id = ?" if user_id is not None else ""
+        user_params: List[Any] = [user_id] if user_id is not None else []
+
         conn = self.get_connection()
         try:
             cursor = conn.execute(
-                """
+                f"""
                 SELECT id, term, content, example_sentence, article_history_id,
-                       created_at, updated_at
+                       created_at, updated_at, user_id
                 FROM vocabulary_notes
-                WHERE content LIKE ? OR term LIKE ? OR example_sentence LIKE ?
+                WHERE (content LIKE ? OR term LIKE ? OR example_sentence LIKE ?){user_clause}
                 ORDER BY created_at DESC, id DESC
                 LIMIT ? OFFSET ?;
                 """,
-                (param, param, param, limit, offset),
+                (param, param, param, *user_params, limit, offset),
             )
             return [self._format_note_row(row) for row in cursor.fetchall()]
         finally:
             if not self.is_memory:
                 conn.close()
 
-    def count_search_notes(self, query: str) -> int:
+    def count_search_notes(self, query: str, user_id: Optional[int] = None) -> int:
         """
         Count total notes matching the search query
         (content, term, example_sentence), so search pagination
@@ -743,14 +943,16 @@ class NotesHistoryManager:
         if not cleaned:
             return 0
         param = f"%{cleaned}%"
+        user_clause = " AND user_id = ?" if user_id is not None else ""
+        user_params: List[Any] = [user_id] if user_id is not None else []
         conn = self.get_connection()
         try:
             cursor = conn.execute(
-                """
+                f"""
                 SELECT COUNT(*) FROM vocabulary_notes
-                WHERE content LIKE ? OR term LIKE ? OR example_sentence LIKE ?;
+                WHERE (content LIKE ? OR term LIKE ? OR example_sentence LIKE ?){user_clause};
                 """,
-                (param, param, param),
+                (param, param, param, *user_params),
             )
             return int(cursor.fetchone()[0])
         finally:
@@ -768,6 +970,7 @@ class NotesHistoryManager:
         clear_example: bool = False,
         clear_article_history: bool = False,
         updated_at: Optional[str] = None,
+        user_id: Optional[int] = None,
     ) -> bool:
         """
         Update fields of an existing note. Automatically refreshes updated_at timestamp.
@@ -777,14 +980,18 @@ class NotesHistoryManager:
             content: New note content (optional).
             term: New vocabulary term (optional).
             example_sentence: New example sentence (optional).
-            article_history_id: New associated article history ID (optional).
+            article_history_id: New associated article history ID (optional;
+                when user_id is provided the referenced entry must belong to
+                the same user).
             clear_term: Explicitly set term to NULL.
             clear_example: Explicitly set example_sentence to NULL.
             clear_article_history: Explicitly set article_history_id to NULL.
             updated_at: Optional custom ISO timestamp.
+            user_id: When provided, only the owning user's note can be updated.
 
         Returns:
-            True if the note was found and updated, False if note_id does not exist.
+            True if the note was found and updated, False if note_id does not
+            exist or belongs to another user.
         """
         if not isinstance(note_id, int) or note_id <= 0:
             return False
@@ -827,38 +1034,57 @@ class NotesHistoryManager:
         updates.append("updated_at = ?")
         params.append(timestamp)
 
-        params.append(note_id)
-
         conn = self.get_connection()
         try:
             with conn:
-                # If article_history_id is provided, verify it exists
+                # If article_history_id is provided, verify it exists — and when
+                # a user context is given, verify it belongs to that same user.
                 if article_history_id is not None and not clear_article_history:
-                    check = conn.execute(
-                        "SELECT id FROM article_history WHERE id = ?;",
-                        (article_history_id,),
-                    ).fetchone()
-                    if not check:
-                        raise ValueError(
-                            f"Referenced article_history_id {article_history_id} does not exist."
-                        )
+                    if user_id is not None:
+                        check = conn.execute(
+                            "SELECT id FROM article_history WHERE id = ? AND user_id = ?;",
+                            (article_history_id, user_id),
+                        ).fetchone()
+                        if not check:
+                            raise ValueError(
+                                f"Referenced article_history_id {article_history_id} does not exist "
+                                "or belongs to another user."
+                            )
+                    else:
+                        check = conn.execute(
+                            "SELECT id FROM article_history WHERE id = ?;",
+                            (article_history_id,),
+                        ).fetchone()
+                        if not check:
+                            raise ValueError(
+                                f"Referenced article_history_id {article_history_id} does not exist."
+                            )
 
-                sql = f"UPDATE vocabulary_notes SET {', '.join(updates)} WHERE id = ?;"
+                user_clause = " AND user_id = ?" if user_id is not None else ""
+                if user_id is not None:
+                    params.append(user_id)
+                params.append(note_id)
+
+                sql = (
+                    f"UPDATE vocabulary_notes SET {', '.join(updates)} "
+                    f"WHERE id = ?{user_clause};"
+                )
                 cursor = conn.execute(sql, tuple(params))
                 return cursor.rowcount > 0
         finally:
             if not self.is_memory:
                 conn.close()
 
-    def delete_note(self, note_id: int) -> bool:
+    def delete_note(self, note_id: int, user_id: Optional[int] = None) -> bool:
         """
         Delete a single note by ID.
 
         Args:
             note_id: Note ID to delete.
+            user_id: When provided, only the owning user's note can be deleted.
 
         Returns:
-            True if deleted, False if not found.
+            True if deleted, False if not found or not owned.
         """
         if not isinstance(note_id, int) or note_id <= 0:
             return False
@@ -866,10 +1092,16 @@ class NotesHistoryManager:
         conn = self.get_connection()
         try:
             with conn:
-                cursor = conn.execute(
-                    "DELETE FROM vocabulary_notes WHERE id = ?;",
-                    (note_id,),
-                )
+                if user_id is not None:
+                    cursor = conn.execute(
+                        "DELETE FROM vocabulary_notes WHERE id = ? AND user_id = ?;",
+                        (note_id, user_id),
+                    )
+                else:
+                    cursor = conn.execute(
+                        "DELETE FROM vocabulary_notes WHERE id = ?;",
+                        (note_id,),
+                    )
                 return cursor.rowcount > 0
         finally:
             if not self.is_memory:
@@ -905,4 +1137,5 @@ class NotesHistoryManager:
             "article_history_id": row["article_history_id"],
             "created_at": row["created_at"],
             "updated_at": row["updated_at"],
+            "user_id": row["user_id"],
         }

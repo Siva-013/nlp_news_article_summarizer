@@ -333,3 +333,47 @@ class EvaluateResponse(BaseModel):
     rouge1: RougeScore
     rouge2: RougeScore
     rougeL: RougeScore
+
+
+# =============================================================================
+# USER AUTHENTICATION SCHEMAS
+# =============================================================================
+
+class RegisterRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=32, description="Account username.")
+    password: str = Field(..., min_length=8, max_length=72, description="Account password (8-72 chars).")
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        cleaned = v.strip()
+        if not cleaned:
+            raise ValueError("Username cannot be empty or contain only whitespace.")
+        if not all(ch.isalnum() or ch in "-_." for ch in cleaned):
+            raise ValueError("Username may only contain letters, digits, '-', '_' and '.'.")
+        return cleaned
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v.encode("utf-8")) > 72:
+            raise ValueError("Password is too long (max 72 bytes).")
+        return v
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=1, description="Account username.")
+    password: str = Field(..., min_length=1, description="Account password.")
+
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    created_at: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in_hours: int
+    user: UserResponse

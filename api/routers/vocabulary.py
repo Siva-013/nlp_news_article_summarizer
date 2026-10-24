@@ -4,7 +4,11 @@ POST /api/v1/vocabulary/extract
 POST /api/v1/vocabulary/detect-new
 """
 
-from fastapi import APIRouter, HTTPException, status
+from typing import Any, Dict
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from api.dependencies import get_current_user
 
 from api.schemas import (
     VocabularyExtractRequest,
@@ -24,7 +28,10 @@ router = APIRouter(prefix="/vocabulary", tags=["Vocabulary"])
     summary="Extract Vocabulary Items",
     description="Extract salient lexical content words and named entities with deterministic heuristic scores (Phase 7).",
 )
-def extract_vocabulary(request: VocabularyExtractRequest):
+def extract_vocabulary(
+    request: VocabularyExtractRequest,
+    user: Dict[str, Any] = Depends(get_current_user),
+):
     try:
         result = run_vocabulary_extraction(
             text=request.text,
@@ -49,7 +56,10 @@ def extract_vocabulary(request: VocabularyExtractRequest):
     summary="Detect New Words Against Known Vocabulary",
     description="Classifies extracted vocabulary items into 'known_words' and 'new_words' using classical canonical matching (Phase 8).",
 )
-def detect_new_words(request: VocabularyDetectNewRequest):
+def detect_new_words(
+    request: VocabularyDetectNewRequest,
+    user: Dict[str, Any] = Depends(get_current_user),
+):
     if not request.text and not request.extraction_record:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

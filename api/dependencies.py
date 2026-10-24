@@ -6,8 +6,12 @@ Phase 11: FastAPI Backend Integration
 import os
 from pathlib import Path
 import re
-from typing import Generator, Optional
+from typing import Any, Dict, Generator, Optional
 
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from api.security import decode_access_token
 from database.notes_history import NotesHistoryManager, DEFAULT_DB_PATH
 from speech.text_to_speech import TextToSpeechEngine
 
@@ -78,3 +82,45 @@ def validate_safe_audio_id(audio_id: str) -> str:
         raise ValueError("Invalid audio ID format. Only alphanumeric characters, hyphens, and underscores are allowed.")
 
     return raw_id
+
+
+# Bearer-token extractor for authenticated endpoints (auto-docs the 401 response).
+_bearer_scheme = HTTPBearer(auto_error=False)
+
+
+def get_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(_bearer_scheme),
+    db: NotesHistoryManager = Depends(get_db),
+) -> Dict[str, Any]:
+    """
+    Resolve the authenticated user from the Authorization: Bearer <jwt> header.
+
+    Returns:
+        {"id": int, "username": str, "created_at": str}
+
+    Raises:
+        HTTPException 401: Missing, malformed, expired, or invalid token; or
+        the referenced user no longer exists.
+    """
+    unauthorized = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required. Provide a valid Bearer token.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if credentials is None or not credentials.credentials:
+        raise unauthorized
+
+    payload = decode_access_token(credentials.credentials)
+    if not payload:
+        raise unauthorized
+
+    try:
+        user_id = int(payload["sub"])
+    except (TypeError, ValueError):
+        raise unauthorized
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        raise unauthorized
+
+    return {"id": user["id"], "username": user["username"], "created_at": user["created_at"]}
