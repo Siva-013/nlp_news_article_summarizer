@@ -1,6 +1,6 @@
 import './StatusBadge.css';
 
-/** Small pill badge. tones: neutral, accent, success, warning, danger, info */
+/** Small printed label. tones: neutral, accent(lime), success, warning, danger, info */
 export function StatusBadge({ tone = 'neutral', children, className = '' }) {
   return <span className={`badge badge--${tone} ${className}`}>{children}</span>;
 }

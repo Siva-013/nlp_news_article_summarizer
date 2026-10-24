@@ -3,7 +3,7 @@
 .skeleton__circle {
   display: block;
   border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background: linear-gradient(90deg, #e7e2d2 25%, #efeadd 50%, #e7e2d2 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
@@ -30,13 +30,13 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-1);
-  border-radius: var(--radius-md);
+  border: var(--rule-faint);
+  border-radius: var(--radius-sm);
 }
 
 .skeleton__circle {
   width: 30px;
   height: 30px;
-  border-radius: var(--radius-full);
+  border-radius: 50%;
   flex-shrink: 0;
 }

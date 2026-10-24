@@ -1,0 +1,102 @@
+.strip {
+  height: var(--topstrip-height);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  border-bottom: var(--rule-soft);
+  background: #f5f2e9d9;
+  backdrop-filter: blur(6px);
+  padding: 0 var(--space-5);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.strip__menu {
+  display: none;
+  font-size: 1rem;
+  border: var(--rule-soft);
+  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-card);
+}
+
+.strip__crumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.strip__crumb-strip {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.strip__crumb {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.strip__crumb-sep {
+  color: #b4ad94;
+  margin: 0 2px;
+}
+
+.strip__search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--paper);
+  border: var(--rule-soft);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  width: min(280px, 40vw);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.strip__search:focus-within {
+  border-color: var(--ink);
+  background: var(--paper-card);
+}
+
+.strip__search-icon {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
+
+.strip__search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.82rem;
+  width: 100%;
+  color: var(--ink);
+}
+
+.strip__search input::placeholder {
+  color: var(--ink-faint);
+}
+
+@media (max-width: 900px) {
+  .strip__menu { display: inline-flex; }
+  .strip__crumb { display: none; }
+  .strip__search { width: auto; flex: 1; }
+}

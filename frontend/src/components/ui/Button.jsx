@@ -1,9 +1,9 @@
 import './Button.css';
 
 /**
- * Shared button.
- * variants: primary (gradient), secondary (surface), ghost (transparent),
- * danger (destructive)
+ * Shared button — flat editorial style.
+ * variants: primary (ink slab, lime edge), secondary (paper + rule),
+ * ghost (transparent), danger (rust ink)
  */
 export function Button({
   variant = 'secondary',

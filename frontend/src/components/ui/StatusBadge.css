@@ -2,69 +2,69 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 9px;
-  border-radius: var(--radius-full);
+  padding: 1px 8px;
+  border-radius: 4px;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   border: 1px solid transparent;
-  line-height: 1.7;
+  line-height: 1.8;
   white-space: nowrap;
 }
 
 .badge--neutral {
-  background: var(--surface-2);
-  border-color: var(--border-2);
-  color: var(--text-2);
+  background: var(--paper-deep);
+  border-color: #c9c2ab;
+  color: var(--ink-muted);
 }
 
 .badge--accent {
-  background: var(--accent-soft);
-  border-color: #7c9cff40;
-  color: #b3c6ff;
+  background: var(--lime);
+  border-color: var(--ink);
+  color: var(--ink);
 }
 
 .badge--success {
-  background: var(--success-bg);
-  border-color: var(--success-border);
-  color: #8fe6c2;
+  background: var(--ok-bg);
+  border-color: var(--ok);
+  color: var(--ok);
 }
 
 .badge--warning {
-  background: var(--warning-bg);
-  border-color: var(--warning-border);
-  color: #f5d690;
+  background: var(--warn-bg);
+  border-color: var(--warn);
+  color: var(--warn);
 }
 
 .badge--danger {
-  background: var(--danger-bg);
-  border-color: var(--danger-border);
-  color: #ffa9a9;
+  background: var(--bad-bg);
+  border-color: var(--bad);
+  color: var(--bad);
 }
 
 .badge--info {
-  background: var(--info-bg);
-  border-color: #22d3ee40;
-  color: #8ceaf7;
+  background: #e7ebfa;
+  border-color: var(--cobalt);
+  color: var(--cobalt);
 }
 
 /* POS chips */
 .pos-badge {
   display: inline-flex;
-  padding: 1px 7px;
-  border-radius: 6px;
+  padding: 0 6px;
+  border-radius: 3px;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--text-2);
-  background: var(--surface-3);
-  border: 1px solid var(--border-2);
+  color: var(--ink-muted);
+  background: var(--paper-deep);
+  border: 1px solid #c9c2ab;
 }
 
 .pos-badge--other {
-  color: var(--text-3);
+  color: var(--ink-faint);
   border-style: dashed;
 }

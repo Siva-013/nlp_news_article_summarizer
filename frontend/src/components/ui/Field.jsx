@@ -2,7 +2,7 @@ import './Field.css';
 
 /**
  * Labeled text input / textarea with optional clear button, hint and error.
- * Same prop API across single- and multi-line variants.
+ * Paper-toned fields with ink rules; label is a mono uppercase tag.
  */
 export function Field({
   id,
@@ -27,7 +27,7 @@ export function Field({
         )}
         {hasValue && onClear ? (
           <button type="button" className="field__clear" onClick={onClear} aria-label={`Clear ${label || 'field'}`}>
-            clear
+            clear ✕
           </button>
         ) : null}
       </div>

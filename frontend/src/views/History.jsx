@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { deleteHistory, listHistory, searchHistory } from '../api/history.js';
 import { Button } from '../components/ui/Button.jsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.jsx';
@@ -26,6 +26,7 @@ function formatDate(iso) {
 export function History() {
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
   const { setLastArticleText, setLastSummary, setLastHistoryId, setTtsPendingText } = useAppState();
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -56,8 +57,16 @@ export function History() {
   }, []);
 
   useEffect(() => {
-    load(0, '', '');
-  }, [load]);
+    const q = searchParams.get('q');
+    if (q) {
+      setQuery(q);
+      load(0, q, '');
+    } else {
+      load(0, '', '');
+    }
+    // Run once on mount; ?q= changes come with a fresh mount via the strip.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function applyMethod(method) {
     const next = methodFilter === method ? '' : method;

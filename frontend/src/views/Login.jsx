@@ -60,10 +60,10 @@ export function Login() {
       <div className="auth__panel">
         <div className="auth__brand">
           <span className="auth__glyph" aria-hidden="true">L</span>
-          <h1 className="auth__title">Lexica</h1>
+          <h1 className="auth__title">Lexi<span className="auth__title-hl">NLP</span></h1>
           <p className="auth__tagline">
-            Your private workspace for extractive news summarization,
-            vocabulary learning, and offline listening.
+            A field notebook for news — extractive summarization,
+            vocabulary learning, and offline listening, kept privately for your account.
           </p>
           <ul className="auth__points">
             <li>Notes and history are visible only to you</li>

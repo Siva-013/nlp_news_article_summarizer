@@ -13,48 +13,49 @@
 }
 
 .field__label {
-  font-size: 0.74rem;
-  font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-3);
   font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
 }
 
 .field__clear {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--accent);
-  opacity: 0.8;
-  transition: opacity var(--transition-fast);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  transition: color var(--transition-fast);
 }
-.field__clear:hover { opacity: 1; }
+.field__clear:hover { color: var(--bad); }
 
 .field__input {
   width: 100%;
-  background: var(--surface-inset);
-  border: 1px solid var(--border-2);
-  border-radius: var(--radius-md);
-  color: var(--text-1);
+  background: #faf8f0;
+  border: var(--rule-soft);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
   padding: 11px 13px;
   font-size: 0.92rem;
   line-height: 1.55;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .field__input::placeholder {
-  color: var(--text-3);
+  color: #a9a488;
+  font-style: italic;
 }
 
 .field__input:hover:not(:focus) {
-  border-color: #33436a;
+  border-color: var(--ink);
 }
 
 .field__input:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px #7c9cff24;
-  background: #0d1522;
+  border-color: var(--ink);
+  box-shadow: 3px 3px 0 var(--lime);
+  background: #fdfcf7;
 }
 
 .field__input--area {
@@ -63,18 +64,18 @@
 }
 
 .field--error .field__input {
-  border-color: var(--danger-border);
+  border-color: var(--bad);
 }
 .field--error .field__input:focus {
-  box-shadow: 0 0 0 3px #f87c7c24;
+  box-shadow: 3px 3px 0 var(--bad-bg);
 }
 
 .field__hint {
-  color: var(--text-3);
-  font-size: 0.76rem;
+  color: var(--ink-faint);
+  font-size: 0.74rem;
 }
 
 .field__error {
-  color: #ffa9a9;
-  font-size: 0.8rem;
+  color: var(--bad);
+  font-size: 0.78rem;
 }

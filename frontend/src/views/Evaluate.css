@@ -6,8 +6,8 @@
 }
 
 .rouge-pane__tag {
-  color: var(--text-3);
-  font-size: 0.64rem;
+  color: var(--ink-faint);
+  font-size: 0.62rem;
   text-transform: none;
   letter-spacing: 0.04em;
 }
@@ -47,11 +47,11 @@
 }
 
 .rouge-card__name {
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
   font-family: var(--font-mono);
-  color: var(--text-1);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--ink);
 }
 
 .rouge-card__f1 {
@@ -61,19 +61,16 @@
 }
 
 .rouge-card__f1-value {
-  font-size: 2rem;
-  font-weight: 700;
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  line-height: 1.1;
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.05;
 }
 
 .rouge-card__f1-label {
-  color: var(--text-3);
-  font-size: 0.74rem;
-  font-family: var(--font-mono);
+  color: var(--ink-faint);
+  font-size: 0.72rem;
 }
 
 .rouge-card__meter { height: 8px; }
@@ -85,32 +82,36 @@
 }
 
 .rouge-card__pr dt {
-  color: var(--text-3);
-  font-size: 0.72rem;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .rouge-card__pr dd {
-  color: var(--text-1);
+  color: var(--ink);
+  font-family: var(--font-mono);
   font-size: 0.95rem;
   margin-top: 2px;
 }
 
 .rouge-card__desc {
-  color: var(--text-3);
+  color: var(--ink-muted);
   font-size: 0.76rem;
   line-height: 1.5;
-  border-top: 1px solid var(--border-soft);
+  border-top: var(--rule-faint);
   padding-top: var(--space-3);
 }
 
 @keyframes rouge-card-in {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.98);
+    transform: translateY(10px) rotate(-0.6deg);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0) rotate(0);
   }
 }
 
