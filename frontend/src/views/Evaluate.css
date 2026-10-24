@@ -1,0 +1,127 @@
+.rouge-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.rouge-pane__tag {
+  color: var(--text-3);
+  font-size: 0.64rem;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.rouge-pane__body { padding: var(--space-5); }
+
+.rouge-pane__swap {
+  display: grid;
+  place-items: center;
+  padding: var(--space-2) 0;
+}
+
+.rouge-run {
+  display: flex;
+  justify-content: center;
+}
+
+.rouge-scores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.rouge-card {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: rouge-card-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rouge-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.rouge-card__name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-family: var(--font-mono);
+  color: var(--text-1);
+}
+
+.rouge-card__f1 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.rouge-card__f1-value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.1;
+}
+
+.rouge-card__f1-label {
+  color: var(--text-3);
+  font-size: 0.74rem;
+  font-family: var(--font-mono);
+}
+
+.rouge-card__meter { height: 8px; }
+
+.rouge-card__pr {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.rouge-card__pr dt {
+  color: var(--text-3);
+  font-size: 0.72rem;
+}
+
+.rouge-card__pr dd {
+  color: var(--text-1);
+  font-size: 0.95rem;
+  margin-top: 2px;
+}
+
+.rouge-card__desc {
+  color: var(--text-3);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  border-top: 1px solid var(--border-soft);
+  padding-top: var(--space-3);
+}
+
+@keyframes rouge-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .rouge-grid {
+    grid-template-columns: 1fr;
+  }
+  .rouge-pane__swap {
+    justify-items: center;
+  }
+  .rouge-scores {
+    grid-template-columns: 1fr;
+  }
+}

@@ -118,7 +118,41 @@ python -m summarization.frequency --batch --input dataset/processed/cnn_dailymai
 python -m pytest tests/ -v
 ```
 
-All 33 test cases pass across dataset acquisition, preprocessing pipeline, and frequency-based summarization.
+All 220 test cases pass across dataset acquisition, preprocessing, the three summarizers,
+vocabulary extraction and new-word detection, notes/history persistence, speech synthesis,
+and the FastAPI layer.
+
+### 5. Running the Full Application (API + Web UI)
+
+```bash
+# Terminal 1 — FastAPI backend (http://localhost:8000, docs at /docs):
+.venv\Scripts\activate
+python -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+
+# Terminal 2 — React frontend (http://localhost:5173):
+cd frontend
+npm install
+npm run dev
+```
+
+The web UI ("Lexica") is a dark research-console front end with six workspaces:
+
+- **Summarize** — extractive summarization with Frequency / TF–IDF / TextRank,
+  side-by-side comparison of all three methods, per-sentence scores, top-word
+  charts, and automatic archiving to history.
+- **Vocabulary** — rule-based term extraction with importance scores, POS and
+  entity tags, known-word chips, and new-word detection.
+- **Notes** — SQLite-backed vocabulary notebook with typeahead search.
+- **History** — searchable archive of every summarization run, with method
+  filters, expandable source text, and pagination.
+- **Listen** — offline text-to-speech studio (voice picker, speed/volume
+  controls, WAV download). Each synthesis runs in an isolated subprocess so a
+  stuck SAPI/COM call can never block the API.
+- **Evaluate** — ROUGE-1/2/L scoring against a reference summary, with
+  precision/recall/F1 and overlap verdicts.
+
+The top bar shows a live backend health indicator (polls `/health` every 20 s).
+On narrow screens the navigation moves to a bottom tab bar.
 
 ---
 

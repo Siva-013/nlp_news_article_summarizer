@@ -1,0 +1,80 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 18px;
+}
+
+.field__label {
+  font-size: 0.74rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.field__clear {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+}
+.field__clear:hover { opacity: 1; }
+
+.field__input {
+  width: 100%;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  color: var(--text-1);
+  padding: 11px 13px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.field__input::placeholder {
+  color: var(--text-3);
+}
+
+.field__input:hover:not(:focus) {
+  border-color: #33436a;
+}
+
+.field__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px #7c9cff24;
+  background: #0d1522;
+}
+
+.field__input--area {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.field--error .field__input {
+  border-color: var(--danger-border);
+}
+.field--error .field__input:focus {
+  box-shadow: 0 0 0 3px #f87c7c24;
+}
+
+.field__hint {
+  color: var(--text-3);
+  font-size: 0.76rem;
+}
+
+.field__error {
+  color: #ffa9a9;
+  font-size: 0.8rem;
+}

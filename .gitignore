@@ -30,6 +30,29 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
+# SQLite local database files
+*.db
+*.sqlite
+*.sqlite3
+database/*.db
+
+# Generated audio files (Phase 10 TTS)
+*.wav
+*.mp3
+speech/*.wav
+
+# Frontend (Node / Vite) build artifacts & dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+node_modules/
+npm-debug.log*
+
+# Frontend local env
+frontend/.env
+frontend/.env.*
+
+
 # Large processed dataset files exceeding GitHub 100MB limit
 # Generated dynamically via: python -m preprocessing.pipeline --input dataset/raw/cnn_dailymail_test_1000.jsonl --output dataset/processed/cnn_dailymail_test_1000_processed.jsonl
 dataset/processed/*_processed.jsonl

@@ -1,0 +1,320 @@
+/* ---------- Input card ---------- */
+
+.sum-input {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sum-input__tray {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Controls ---------- */
+
+.sum-controls {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.sum-methods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.sum-method {
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.sum-method:hover {
+  border-color: var(--border-2);
+  background: var(--surface-2);
+}
+
+.sum-method--active {
+  border-color: #7c9cff66;
+  background: linear-gradient(180deg, #16203a, var(--surface-inset));
+  box-shadow: var(--glow-accent);
+}
+
+.sum-method__name {
+  font-weight: 650;
+  font-size: 0.95rem;
+  color: var(--text-1);
+}
+
+.sum-method--active .sum-method__name {
+  color: #cfdcff;
+}
+
+.sum-method__blurb {
+  font-size: 0.74rem;
+  color: var(--text-3);
+  line-height: 1.45;
+}
+
+/* Stepper */
+.sum-length {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  min-width: 150px;
+}
+
+.sum-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sum-stepper__btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-2);
+  background: var(--surface-3);
+  color: var(--text-1);
+  font-size: 1.05rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sum-stepper__btn:hover {
+  background: var(--surface-2);
+  border-color: #3a4c72;
+}
+
+.sum-stepper__value {
+  min-width: 42px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.sum-stepper__bound {
+  color: var(--text-3);
+  font-size: 0.66rem;
+}
+
+/* Run cluster */
+.sum-run {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+/* ---------- Results ---------- */
+
+.sum-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sum-result__badges {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.sum-result__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sum-result__text {
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: var(--text-1);
+  border-left: 3px solid;
+  border-image: var(--gradient-brand) 1;
+  padding-left: var(--space-4);
+}
+
+/* Fold-out sections shared by result cards */
+.sum-card__fold summary {
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 0.84rem;
+  font-weight: 600;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sum-card__fold summary::before {
+  content: '▸';
+  color: var(--accent);
+  font-size: 0.7rem;
+  transition: transform var(--transition-fast);
+}
+
+.sum-card__fold[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.sum-card__fold summary:hover { color: var(--text-1); }
+.sum-card__fold-hint { color: var(--text-3); font-weight: 400; font-size: 0.76rem; }
+
+.sum-card__fold {
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  background: #0d142033;
+}
+
+.sum-card__fold > *:not(summary) {
+  margin-top: var(--space-3);
+}
+
+/* Sentence list */
+.sum-sentences {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sum-sentences__row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-soft);
+}
+
+.sum-sentences__idx { color: var(--text-3); font-size: 0.7rem; }
+.sum-sentences__text { font-size: 0.86rem; color: var(--text-1); line-height: 1.5; }
+.sum-sentences__score { color: var(--accent-3); font-size: 0.78rem; }
+
+/* Top words bars */
+.topwords {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.topwords__row {
+  display: grid;
+  grid-template-columns: 110px 1fr 64px 52px;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.topwords__label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topwords__meter { width: 100%; }
+.topwords__value { color: var(--text-2); text-align: right; font-size: 0.74rem; }
+.topwords__tag { color: var(--text-3); text-align: right; font-size: 0.68rem; }
+
+/* Result actions */
+.sum-result__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-top: 1px solid var(--border-1);
+  padding-top: var(--space-4);
+}
+
+.sum-result__audio-error { margin-top: var(--space-2); }
+
+/* ---------- Compare grid ---------- */
+
+.sum-compare {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.sum-compare__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.sum-compare__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sum-compare__count { color: var(--text-3); font-size: 0.7rem; }
+
+.sum-compare__text {
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: var(--text-1);
+  flex: 1;
+}
+
+.sum-compare__text--error { color: #ffa9a9; }
+
+.sum-compare__foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1000px) {
+  .sum-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  .sum-run {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .sum-compare {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .sum-controls {
+    grid-template-columns: 1fr;
+  }
+  .sum-methods {
+    grid-template-columns: 1fr;
+  }
+  .topwords__row {
+    grid-template-columns: 84px 1fr 56px;
+  }
+  .topwords__tag { display: none; }
+}

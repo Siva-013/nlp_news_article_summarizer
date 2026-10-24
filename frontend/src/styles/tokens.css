@@ -1,0 +1,92 @@
+/* ========================================================
+   LEXICA — Design Token System
+   Dark research-console theme for the NLP study tool.
+   ======================================================== */
+
+:root {
+  /* Surfaces */
+  --bg-page: #070a12;
+  --bg-app: #0b101c;
+  --surface-1: #101725;
+  --surface-2: #151e30;
+  --surface-3: #1a2438;
+  --surface-inset: #0c1320;
+
+  /* Borders */
+  --border-1: #1e2941;
+  --border-2: #2a3854;
+  --border-soft: #1e294166;
+
+  /* Text */
+  --text-1: #e9eef8;
+  --text-2: #a7b2c9;
+  --text-3: #68758f;
+
+  /* Accents */
+  --accent: #7c9cff;
+  --accent-strong: #5b7df2;
+  --accent-2: #a78bfa;
+  --accent-3: #22d3ee;
+  --accent-soft: #7c9cff1f;
+  --gradient-brand: linear-gradient(135deg, #7c9cff 0%, #a78bfa 55%, #22d3ee 120%);
+  --gradient-text: linear-gradient(100deg, #9db5ff, #b7a4fb 55%, #5fe3f5);
+
+  /* Status */
+  --success: #3ddc97;
+  --success-bg: #3ddc971a;
+  --success-border: #3ddc9740;
+  --warning: #fbbf24;
+  --warning-bg: #fbbf241a;
+  --warning-border: #fbbf2440;
+  --danger: #f87c7c;
+  --danger-bg: #f87c7c1a;
+  --danger-border: #f87c7c40;
+  --info: #22d3ee;
+  --info-bg: #22d3ee1a;
+
+  /* Typography */
+  --font-sans: 'Segoe UI Variable Text', 'Segoe UI', -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Cascadia Code', 'Cascadia Mono', 'JetBrains Mono', Consolas,
+    'SF Mono', Menlo, monospace;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 999px;
+
+  /* Elevation */
+  --shadow-1: 0 1px 2px #00000059;
+  --shadow-2: 0 8px 24px -8px #00000073;
+  --shadow-3: 0 16px 48px -12px #00000080;
+  --glow-accent: 0 0 0 1px #7c9cff33, 0 8px 32px -8px #7c9cff2e;
+
+  /* Layout */
+  --topbar-height: 62px;
+  --content-max: 1240px;
+
+  /* Motion */
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+  --transition-slow: 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Z-index */
+  --z-topbar: 100;
+  --z-tabbar: 110;
+  --z-toast: 200;
+  --z-dialog: 300;
+}
