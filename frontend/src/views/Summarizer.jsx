@@ -73,7 +73,7 @@ function TopWords({ topWords, method }) {
   );
 }
 
-function SummaryResult({ result, sourceSentenceCount, onListen, audioLoading, audioError, onCopy, copied, navigateActions }) {
+function SummaryResult({ result, sourceSentenceCount, onListen, audioLoading, audioError, listenUrl, onCopy, copied, navigateActions }) {
   const [hotSentence, setHotSentence] = useState(null);
   const compression = sourceSentenceCount > 0
     ? Math.round((result.num_sentences_selected / sourceSentenceCount) * 100)
@@ -157,6 +157,12 @@ function SummaryResult({ result, sourceSentenceCount, onListen, audioLoading, au
           {navigateActions}
         </div>
 
+        {listenUrl ? (
+          <audio className="sum-result__player" controls src={listenUrl}>
+            Your browser cannot play this audio.
+          </audio>
+        ) : null}
+
         {audioError ? <div className="callout-error sum-result__audio-error">{audioError}</div> : null}
       </div>
     </article>
@@ -203,6 +209,7 @@ export function Summarizer() {
   const [copied, setCopied] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
   const [audioError, setAudioError] = useState('');
+  const [listenUrl, setListenUrl] = useState(null);
   const [recent, setRecent] = useState([]);
   const audioRef = useRef(null);
   const navigate = useNavigate();
@@ -260,6 +267,7 @@ export function Summarizer() {
     try {
       const res = await runSummarize(method, numSentences);
       setResult(res);
+      setListenUrl(null);
       setLastArticleText(text.trim());
       setLastSummary(res);
       if (!res.summary) toast('The extractor returned an empty summary for this input', 'warning');
@@ -317,15 +325,23 @@ export function Summarizer() {
     if (!result?.summary) return;
     setAudioLoading(true);
     setAudioError('');
+    setListenUrl(null);
     try {
       const res = await synthesizeSpeech({ text: result.summary, rate: 175, volume: 1.0 });
       // Fetch the WAV with auth and play from a blob URL — media elements
       // cannot send the Authorization header themselves.
       const playUrl = await getAudioBlobUrl(res.audio_id);
+      setListenUrl(playUrl);
       if (audioRef.current) {
         audioRef.current.src = playUrl;
         audioRef.current.load();
-        await audioRef.current.play();
+        try {
+          await audioRef.current.play();
+        } catch {
+          // Browsers may block auto-play this long after the click — the
+          // summary card now shows a visible player, so just tell the user.
+          toast('Audio ready — press play on the player below', 'info');
+        }
       }
     } catch (err) {
       setAudioError(err.detail || err.message || 'Speech synthesis failed.');
@@ -514,6 +530,7 @@ export function Summarizer() {
                 onListen={handleListen}
                 audioLoading={audioLoading}
                 audioError={audioError}
+                listenUrl={listenUrl}
                 onCopy={handleCopy}
                 copied={copied}
                 navigateActions={navigateActions}
@@ -538,6 +555,7 @@ export function Summarizer() {
                             onClick={() => {
                               setResult(r);
                               setCompareResults(null);
+                              setListenUrl(null);
                               setLastSummary(r);
                             }}
                           >
