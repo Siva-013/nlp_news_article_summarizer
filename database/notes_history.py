@@ -1061,9 +1061,10 @@ class NotesHistoryManager:
                             )
 
                 user_clause = " AND user_id = ?" if user_id is not None else ""
+                # Placeholder order must match the SQL: id first, then user_id.
+                params.append(note_id)
                 if user_id is not None:
                     params.append(user_id)
-                params.append(note_id)
 
                 sql = (
                     f"UPDATE vocabulary_notes SET {', '.join(updates)} "

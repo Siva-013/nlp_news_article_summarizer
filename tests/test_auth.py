@@ -231,6 +231,24 @@ def test_note_cannot_link_to_other_users_history(client):
     assert res.status_code == 400
 
 
+def test_update_own_note_when_ids_differ(client):
+    """Regression: update must match on (note_id, user_id) in the right order.
+
+    A user registered after another user has user_id != first note_id, which
+    exposed a swapped-parameter bug that fresh-database tests masked when
+    both ids happened to be 1.
+    """
+    register(client, "first_user", "password123")  # consumes id 1
+    second = make_user(client, "second_user")      # user id 2
+    created = second.post("/api/v1/notes", json={"content": "Second user's note"})
+    assert created.status_code == 201
+    note_id = created.json()["id"]                 # note id 1 (differs from user id)
+
+    res = second.put(f"/api/v1/notes/{note_id}", json={"content": "Updated by owner"})
+    assert res.status_code == 200, res.text
+    assert res.json()["content"] == "Updated by owner"
+
+
 def test_search_respects_user_isolation(client):
     alice = make_user(client, "alice")
     alice.post("/api/v1/history", json={"summary": "quantum computing advances", "method": "textrank"})
