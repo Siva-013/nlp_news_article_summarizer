@@ -23,7 +23,7 @@
 .badge--accent {
   background: var(--lime);
   border-color: var(--ink);
-  color: var(--ink);
+  color: var(--on-lime);
 }
 
 .badge--success {
@@ -45,7 +45,7 @@
 }
 
 .badge--info {
-  background: #e7ebfa;
+  background: var(--info-soft);
   border-color: var(--cobalt);
   color: var(--cobalt);
 }

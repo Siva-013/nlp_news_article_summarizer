@@ -74,9 +74,28 @@ function TopWords({ topWords, method }) {
 }
 
 function SummaryResult({ result, sourceSentenceCount, onListen, audioLoading, audioError, onCopy, copied, navigateActions }) {
+  const [hotSentence, setHotSentence] = useState(null);
   const compression = sourceSentenceCount > 0
     ? Math.round((result.num_sentences_selected / sourceSentenceCount) * 100)
     : null;
+
+  // Split the summary into per-sentence spans so hovering a row in
+  // "Extracted sentences" can highlight that sentence in the text.
+  const parts = useMemo(() => {
+    const sents = result.selected_sentences || [];
+    if (!sents.length || !result.summary) return null;
+    const out = [];
+    let rest = result.summary;
+    for (const s of sents) {
+      const at = rest.indexOf(s.original_text);
+      if (at === -1) return null; // mismatch — fall back to plain text
+      if (at > 0) out.push({ text: rest.slice(0, at), idx: null });
+      out.push({ text: s.original_text, idx: s.sentence_index });
+      rest = rest.slice(at + s.original_text.length);
+    }
+    if (rest) out.push({ text: rest, idx: null });
+    return out;
+  }, [result]);
 
   return (
     <article className="card sum-result">
@@ -91,14 +110,34 @@ function SummaryResult({ result, sourceSentenceCount, onListen, audioLoading, au
       </div>
 
       <div className="sum-result__body">
-        <p className="sum-result__text">{result.summary || '—'}</p>
+        <p className="sum-result__text">
+          {parts
+            ? parts.map((part, i) =>
+                part.idx == null ? (
+                  <span key={i}>{part.text}</span>
+                ) : (
+                  <span
+                    key={i}
+                    className={`sum-result__part ${hotSentence === part.idx ? 'sum-result__part--hot' : ''}`}
+                  >
+                    {part.text}
+                  </span>
+                ),
+              )
+            : result.summary || '—'}
+        </p>
 
         {result.selected_sentences?.length > 0 ? (
           <details className="fold" open>
             <summary>Extracted sentences &amp; scores</summary>
             <ul className="sum-sentences">
               {result.selected_sentences.map((s) => (
-                <li key={s.sentence_index} className="sum-sentences__row">
+                <li
+                  key={s.sentence_index}
+                  className={`sum-sentences__row ${hotSentence === s.sentence_index ? 'sum-sentences__row--hot' : ''}`}
+                  onMouseEnter={() => setHotSentence(s.sentence_index)}
+                  onMouseLeave={() => setHotSentence(null)}
+                >
                   <span className="sum-sentences__idx mono">#{s.sentence_index + 1}</span>
                   <span className="sum-sentences__text">{s.original_text}</span>
                   <span className="sum-sentences__score mono">{Number(s.score).toFixed(4)}</span>

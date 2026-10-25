@@ -5,7 +5,7 @@
  */
 
 const LIME = '#C6F24E';
-const INK = '#16150F';
+const INK = 'var(--ink)';
 
 export function MarkerUnderline({ className = '', color = LIME, flip = false }) {
   return (
@@ -23,6 +23,8 @@ export function MarkerUnderline({ className = '', color = LIME, flip = false }) 
         strokeWidth="7"
         strokeLinecap="round"
         opacity="0.85"
+        pathLength="1"
+        className="doodle-draw"
       />
     </svg>
   );

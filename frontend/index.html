@@ -7,8 +7,17 @@
     <title>LexiNLP — A Field Notebook for News</title>
     <meta
       name="description"
-      content="Dark research console for extractive news summarization, vocabulary learning, notes, article history, offline text-to-speech, and ROUGE evaluation."
+      content="A field notebook for news: extractive summarization, vocabulary learning, notes, history, offline text-to-speech, and ROUGE evaluation."
     />
+    <meta name="theme-color" content="#f2efe6" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        if (localStorage.getItem('lexica_theme') === 'night') {
+          document.documentElement.dataset.theme = 'night';
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

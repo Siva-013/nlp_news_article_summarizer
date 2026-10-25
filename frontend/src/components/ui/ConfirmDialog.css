@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-dialog);
-  background: #16150fb8;
+  background: var(--backdrop);
   display: grid;
   place-items: center;
   padding: var(--space-5);

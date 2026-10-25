@@ -16,7 +16,7 @@
 
 .history-search input {
   flex: 1;
-  background: #faf8f0;
+  background: var(--paper-input);
   border: var(--rule-soft);
   border-radius: var(--radius-sm);
   color: var(--ink);
@@ -57,7 +57,7 @@
   background: var(--lime);
   border: var(--rule);
   color: var(--ink);
-  box-shadow: 2px 2px 0 var(--ink);
+  box-shadow: 2px 2px 0 var(--print);
 }
 
 .history-filter--disabled {
@@ -146,7 +146,7 @@
   color: var(--ink-muted);
   font-size: 0.8rem;
   line-height: 1.65;
-  background: #faf8f0;
+  background: var(--paper-input);
   border: var(--rule-faint);
   border-radius: var(--radius-sm);
   padding: var(--space-3);

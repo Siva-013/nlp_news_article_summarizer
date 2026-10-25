@@ -30,11 +30,11 @@
 /* Variants */
 .btn--primary {
   background: var(--ink);
-  color: #f5f2e9;
+  color: var(--on-ink);
   box-shadow: 3px 3px 0 var(--lime);
 }
 .btn--primary:hover:not(:disabled) {
-  background: #000;
+  background: var(--ink-hover);
   box-shadow: 4px 4px 0 var(--lime);
   transform: translate(-1px, -1px);
 }
@@ -94,16 +94,17 @@
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  border: 2px solid #f5f2e955;
-  border-top-color: #f5f2e9;
+  border: 2px solid #00000026;
+  border-top-color: currentColor;
   animation: btn-spin 700ms linear infinite;
 }
 
 .btn--secondary .btn__spinner span,
 .btn--ghost .btn__spinner span,
 .btn--danger .btn__spinner span {
-  border-color: #16150f33;
-  border-top-color: var(--ink);
+  color: var(--ink);
+  border-color: #0000001f;
+  border-top-color: currentColor;
 }
 
 @keyframes btn-spin {

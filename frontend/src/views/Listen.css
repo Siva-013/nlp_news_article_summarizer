@@ -24,7 +24,7 @@
 .listen-voice {
   text-align: left;
   border: var(--rule-soft);
-  background: #faf8f0;
+  background: var(--paper-input);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
   display: flex;
@@ -38,7 +38,7 @@
 .listen-voice--active {
   border: var(--rule);
   background: var(--lime);
-  box-shadow: 3px 3px 0 var(--ink);
+  box-shadow: 3px 3px 0 var(--print);
 }
 
 .listen-voice__name { font-size: 0.88rem; font-weight: 650; color: var(--ink); }
@@ -66,7 +66,7 @@ input[type='range'] {
   height: 6px;
   border-radius: var(--radius-full);
   background: var(--paper-deep);
-  border: 1px solid #c9c2ab;
+  border: 1px solid var(--hairline);
   outline-offset: 4px;
 }
 
@@ -112,7 +112,7 @@ input[type='range']::-moz-range-thumb {
 .listen-preset--active {
   background: var(--ink);
   border-color: var(--ink);
-  color: var(--lime);
+  color: var(--on-ink);
 }
 
 /* Generating state */
@@ -159,11 +159,11 @@ input[type='range']::-moz-range-thumb {
   border-radius: 50%;
   background: var(--lime);
   border: 2px solid var(--ink);
-  color: var(--ink);
+  color: var(--on-lime);
   font-size: 1rem;
   display: grid;
   place-items: center;
-  box-shadow: 3px 3px 0 var(--ink);
+  box-shadow: 3px 3px 0 var(--print);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -212,7 +212,7 @@ input[type='range']::-moz-range-thumb {
 
 .listen-player__download:hover {
   background: var(--lime);
-  box-shadow: 2px 2px 0 var(--ink);
+  box-shadow: 2px 2px 0 var(--print);
 }
 
 .listen-player audio {

@@ -16,7 +16,7 @@
   background: var(--paper-card);
   border: var(--rule);
   border-radius: var(--radius-sm);
-  box-shadow: 4px 4px 0 #16150f22;
+  box-shadow: 4px 4px 0 var(--shadow-soft);
   padding: 10px 12px 10px 12px;
   font-size: 0.85rem;
   color: var(--ink);

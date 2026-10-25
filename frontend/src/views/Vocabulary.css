@@ -29,7 +29,7 @@
 
 .vocab-params__number {
   width: 72px;
-  background: #faf8f0;
+  background: var(--paper-input);
   border: var(--rule-soft);
   border-radius: var(--radius-sm);
   color: var(--ink);
@@ -83,7 +83,7 @@
   padding: var(--space-2);
   border: var(--rule-faint);
   border-radius: var(--radius-sm);
-  background: #faf8f0;
+  background: var(--paper-input);
 }
 
 .vocab-chips__empty {
@@ -100,7 +100,7 @@
   gap: 6px;
   background: var(--lime);
   border: var(--rule);
-  color: var(--ink);
+  color: var(--on-lime);
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 700;
@@ -114,7 +114,7 @@
 }
 
 .vocab-chip-input {
-  background: #faf8f0;
+  background: var(--paper-input);
   border: var(--rule-soft);
   border-radius: var(--radius-sm);
   color: var(--ink);
@@ -166,7 +166,7 @@
 
 /* Results list */
 .vocab-filter {
-  background: #faf8f0;
+  background: var(--paper-input);
   border: var(--rule-soft);
   border-radius: var(--radius-sm);
   color: var(--ink);
@@ -199,10 +199,10 @@
 }
 
 .vocab-row:last-child { border-bottom: none; }
-.vocab-row:hover { background: #faf8f0; }
+.vocab-row:hover { background: var(--paper-input); }
 
-.vocab-row--new { background: #c6f24e1a; }
-.vocab-row--known { background: #e5efdb66; }
+.vocab-row--new { background: var(--wash-lime); }
+.vocab-row--known { background: var(--wash-ok); }
 
 .vocab-row__main {
   display: flex;

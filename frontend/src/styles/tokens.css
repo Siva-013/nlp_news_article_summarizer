@@ -1,19 +1,34 @@
 /* ========================================================
    LEXINLP — Design Token System
-   Editorial "field notebook" theme: cream paper, ink
-   borders, lime highlighter, serif headlines, mono notes.
+   Editorial "field notebook" theme with a day / night pair.
+   Day: cream paper, ink text, lime highlighter.
+   Night: warm black paper, cream ink, same lime.
    ======================================================== */
 
 :root {
-  /* Paper & ink */
+  /* Paper & ink — DAY */
   --paper: #f2efe6;
   --paper-card: #f5f2e9;
   --paper-deep: #eae6d8;
+  --paper-input: #faf8f0;
+  --paper-input-focus: #fdfcf7;
+  --paper-bright: #fbf9f1;
+  --wash: #f5f2e9;
+  --wash-2: #e7e2d2;
+  --wash-3: #efeadd;
+  --wash-soft: #f5f2e966;
+  --wash-lime: #c6f24e1a;
+  --wash-ok: #e5efdb66;
   --paper-rule: #d9d3c0;
   --ink: #16150f;
   --ink-panel: #101010;
   --ink-muted: #55523f;
   --ink-faint: #8a8672;
+
+  /* Hairlines & grid */
+  --hairline: #c9c2ab;
+  --hairline-strong: #b4ad94;
+  --grid-line: #d9d3c026;
 
   /* Highlighter & accents */
   --lime: #c6f24e;
@@ -21,6 +36,7 @@
   --lime-soft: #c6f24e2b;
   --rust: #d4562e;
   --cobalt: #2f4fd8;
+  --info-soft: #e7ebfa;
 
   /* Status (printed, flat) */
   --ok: #3e7c2f;
@@ -29,6 +45,19 @@
   --warn-bg: #f6ecd4;
   --bad: #b3261e;
   --bad-bg: #f6e3e0;
+
+  /* Text on dark or lime surfaces — constant */
+  --on-ink: #f5f2e9;
+  --on-lime: #16150f;
+  --on-lime-soft: #3d3a24;
+  --ink-hover: #000000;
+
+  /* Depth — offset print shadows */
+  --print: #000000;
+  --shadow-soft: #16150f1f;
+  --backdrop: #16150fb8;
+  --strip-bg: #f5f2e9d9;
+  --placeholder: #a9a488;
 
   /* Typography */
   --font-serif: Georgia, 'Georgia Pro', 'Times New Roman', Times, serif;
@@ -74,4 +103,53 @@
   --z-tabbar: 110;
   --z-toast: 200;
   --z-dialog: 300;
+}
+
+/* ========================================================
+   NIGHT — warm black paper, cream ink, same highlighter
+   ======================================================== */
+
+[data-theme='night'] {
+  --paper: #171610;
+  --paper-card: #1d1c14;
+  --paper-deep: #272518;
+  --paper-input: #1b1a12;
+  --paper-input-focus: #221f13;
+  --paper-bright: #1f1e15;
+  --wash: #242217;
+  --wash-2: #2e2b1b;
+  --wash-3: #383420;
+  --wash-soft: #24221766;
+  --wash-lime: #c6f24e1c;
+  --wash-ok: #86c95c14;
+  --paper-rule: #3b3927;
+  --ink: #ece8d3;
+  --ink-panel: #0d0d0a;
+  --ink-muted: #b3ae92;
+  --ink-faint: #817c61;
+
+  --hairline: #4a4732;
+  --hairline-strong: #5d5940;
+  --grid-line: #ffffff07;
+
+  --cobalt: #96a9ff;
+  --info-soft: #262c47;
+
+  --ok: #8fcd66;
+  --ok-bg: #1e2b14;
+  --warn: #e3a83c;
+  --warn-bg: #2e2410;
+  --bad: #f0857a;
+  --bad-bg: #331713;
+
+  --on-ink: #14130b;
+  --ink-hover: #fdfaeb;
+
+  --shadow-soft: #00000059;
+  --backdrop: #000000d0;
+  --strip-bg: #171610e0;
+  --placeholder: #6d684e;
+
+  --rule-soft: 1px solid #4a4732;
+  --rule-faint: 1px solid #3b3927;
 }

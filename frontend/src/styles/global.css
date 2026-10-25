@@ -24,8 +24,8 @@ html {
 body {
   background-color: var(--paper);
   background-image:
-    linear-gradient(#d9d3c026 1px, transparent 1px),
-    linear-gradient(90deg, #d9d3c026 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 26px 26px;
   color: var(--ink);
   font-family: var(--font-sans);
@@ -67,20 +67,20 @@ a {
 
 ::selection {
   background: var(--lime);
-  color: var(--ink);
+  color: var(--on-lime);
 }
 
 /* Scrollbars — thin, paper-toned */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #c9c2ab transparent;
+  scrollbar-color: var(--hairline) transparent;
 }
 *::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #c9c2ab;
+  background: var(--hairline);
   border: 2px solid var(--paper);
   border-radius: var(--radius-full);
 }
@@ -198,7 +198,7 @@ a {
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: var(--ink);
+  color: var(--on-lime);
 }
 
 /* Inline callouts */
@@ -244,7 +244,7 @@ a {
 .meter {
   height: 6px;
   background: var(--paper-deep);
-  border: 1px solid #c9c2ab;
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -281,7 +281,7 @@ a {
   font-family: var(--font-serif);
   font-weight: 800;
   font-size: 1.5rem;
-  color: var(--ink);
+  color: var(--on-lime);
   animation: splash-pulse 1.6s ease-in-out infinite;
 }
 
@@ -304,6 +304,17 @@ a {
 @keyframes shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
+}
+
+/* Paper grain — a whisper of texture over everything */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @media (prefers-reduced-motion: reduce) {
