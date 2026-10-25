@@ -62,6 +62,7 @@
 
 .hero__chip:first-child {
   background: var(--lime);
+  color: var(--on-lime);
 }
 
 /* Collage */
@@ -146,7 +147,8 @@
   font-size: 0.64rem;
   font-weight: 700;
   background: var(--lime);
-  border: var(--rule);
+  border: 1px solid #16150f;
+  color: var(--on-lime);
   border-radius: var(--radius-sm);
   padding: 1px 8px;
 }
@@ -250,7 +252,7 @@
 
 .sum-method--active {
   background: var(--lime);
-  border: var(--rule);
+  border: 1px solid #16150f;
   box-shadow: 3px 3px 0 var(--print);
 }
 
@@ -714,7 +716,8 @@
   font-size: 0.7rem;
   font-weight: 700;
   background: var(--lime);
-  border: var(--rule);
+  border: 1px solid #16150f;
+  color: var(--on-lime);
   border-radius: var(--radius-sm);
   padding: 1px 9px;
 }
@@ -808,5 +811,6 @@
 
 .sum-sentences__row--hot {
   background: var(--lime);
-  border-color: var(--ink);
+  border-color: #16150f;
+  color: var(--on-lime);
 }

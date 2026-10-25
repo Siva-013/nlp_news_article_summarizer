@@ -22,7 +22,7 @@
 
 .badge--accent {
   background: var(--lime);
-  border-color: var(--ink);
+  border-color: #16150f;
   color: var(--on-lime);
 }
 

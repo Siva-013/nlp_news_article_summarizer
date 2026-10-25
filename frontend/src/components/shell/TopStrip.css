@@ -120,5 +120,6 @@
 .strip__theme:hover {
   border-color: var(--ink);
   background: var(--lime);
+  color: var(--on-lime);
   transform: rotate(-12deg);
 }

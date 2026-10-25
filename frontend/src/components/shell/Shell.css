@@ -7,8 +7,8 @@
   left: -9999px;
   top: 0;
   background: var(--lime);
-  color: var(--ink);
-  border: var(--rule);
+  color: var(--on-lime);
+  border: 1px solid #16150f;
   padding: var(--space-2) var(--space-4);
   z-index: var(--z-dialog);
 }

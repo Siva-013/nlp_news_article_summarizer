@@ -68,7 +68,7 @@
 
 .notes-item--active {
   background: var(--lime);
-  border: var(--rule);
+  border: 1px solid #16150f;
   box-shadow: 2px 2px 0 var(--print);
 }
 
@@ -77,6 +77,10 @@
 }
 
 .notes-item--active .notes-item__preview {
+  color: var(--on-lime-soft);
+}
+
+.notes-item--active .notes-item__date {
   color: var(--on-lime-soft);
 }
 

@@ -45,7 +45,7 @@
 .toast--warning .toast__icon { background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
 
 .toast--info { border-left: 4px solid var(--ink); }
-.toast--info .toast__icon { background: var(--lime); color: var(--ink); border-color: var(--ink); }
+.toast--info .toast__icon { background: var(--lime); color: var(--on-lime); border-color: #16150f; }
 
 .toast__message {
   flex: 1;

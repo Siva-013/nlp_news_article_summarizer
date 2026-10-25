@@ -79,7 +79,7 @@
 
 .history-filter--active {
   background: var(--lime);
-  border: var(--rule);
+  border: 1px solid #16150f;
   color: var(--on-lime);
   box-shadow: 2px 2px 0 var(--print);
 }
