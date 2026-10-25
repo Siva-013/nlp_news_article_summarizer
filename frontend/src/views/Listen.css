@@ -41,6 +41,9 @@
   box-shadow: 3px 3px 0 var(--print);
 }
 
+.listen-voice--active .listen-voice__name { color: var(--on-lime); }
+.listen-voice--active .listen-voice__meta { color: var(--on-lime-soft); }
+
 .listen-voice__name { font-size: 0.88rem; font-weight: 650; color: var(--ink); }
 .listen-voice__meta { color: var(--ink-faint); font-size: 0.66rem; }
 

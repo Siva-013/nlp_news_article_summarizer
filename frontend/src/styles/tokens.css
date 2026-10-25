@@ -57,6 +57,7 @@
   --shadow-soft: #16150f1f;
   --backdrop: #16150fb8;
   --strip-bg: #f5f2e9d9;
+  --grain-opacity: 0.05;
   --placeholder: #a9a488;
 
   /* Typography */
@@ -110,46 +111,47 @@
    ======================================================== */
 
 [data-theme='night'] {
-  --paper: #171610;
-  --paper-card: #1d1c14;
-  --paper-deep: #272518;
-  --paper-input: #1b1a12;
-  --paper-input-focus: #221f13;
-  --paper-bright: #1f1e15;
-  --wash: #242217;
-  --wash-2: #2e2b1b;
-  --wash-3: #383420;
-  --wash-soft: #24221766;
-  --wash-lime: #c6f24e1c;
-  --wash-ok: #86c95c14;
-  --paper-rule: #3b3927;
-  --ink: #ece8d3;
-  --ink-panel: #0d0d0a;
-  --ink-muted: #b3ae92;
-  --ink-faint: #817c61;
+  --paper: #14130c;
+  --paper-card: #1e1c12;
+  --paper-deep: #292617;
+  --paper-input: #191710;
+  --paper-input-focus: #211e13;
+  --paper-bright: #272417;
+  --wash: #272416;
+  --wash-2: #322e1c;
+  --wash-3: #3b3722;
+  --wash-soft: #27241666;
+  --wash-lime: #c6f24e1f;
+  --wash-ok: #8fcd6618;
+  --paper-rule: #3f3b25;
+  --ink: #f2eeda;
+  --ink-panel: #0c0c09;
+  --ink-muted: #c2bda1;
+  --ink-faint: #918c71;
 
-  --hairline: #4a4732;
-  --hairline-strong: #5d5940;
-  --grid-line: #ffffff07;
+  --hairline: #575236;
+  --hairline-strong: #6e6847;
+  --grid-line: #ffffff09;
 
-  --cobalt: #96a9ff;
-  --info-soft: #262c47;
+  --cobalt: #a3b4ff;
+  --info-soft: #2a3052;
 
-  --ok: #8fcd66;
-  --ok-bg: #1e2b14;
-  --warn: #e3a83c;
-  --warn-bg: #2e2410;
-  --bad: #f0857a;
-  --bad-bg: #331713;
+  --ok: #98d470;
+  --ok-bg: #202d14;
+  --warn: #edaf48;
+  --warn-bg: #332712;
+  --bad: #f5907f;
+  --bad-bg: #381813;
 
   --on-ink: #14130b;
-  --ink-hover: #fdfaeb;
+  --ink-hover: #fffbe8;
 
-  --shadow-soft: #00000059;
-  --backdrop: #000000d0;
-  --strip-bg: #171610e0;
-  --placeholder: #6d684e;
+  --shadow-soft: #00000075;
+  --backdrop: #000000d6;
+  --strip-bg: #14130ce8;
+  --grain-opacity: 0.032;
+  --placeholder: #7a7457;
 
-  --rule-soft: 1px solid #4a4732;
-  --rule-faint: 1px solid #3b3927;
+  --rule-soft: 1px solid #565238;
+  --rule-faint: 1px solid #44412c;
 }
