@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { summarize } from '../api/summarize.js';
 import { createHistory, listHistory } from '../api/history.js';
-import { synthesizeSpeech, getAudioUrl } from '../api/speech.js';
+import { synthesizeSpeech, getAudioBlobUrl } from '../api/speech.js';
 import { Button } from '../components/ui/Button.jsx';
 import { Field } from '../components/ui/Field.jsx';
 import { SkeletonBlock } from '../components/ui/Skeleton.jsx';
@@ -280,8 +280,11 @@ export function Summarizer() {
     setAudioError('');
     try {
       const res = await synthesizeSpeech({ text: result.summary, rate: 175, volume: 1.0 });
+      // Fetch the WAV with auth and play from a blob URL — media elements
+      // cannot send the Authorization header themselves.
+      const playUrl = await getAudioBlobUrl(res.audio_id);
       if (audioRef.current) {
-        audioRef.current.src = getAudioUrl(res.audio_id);
+        audioRef.current.src = playUrl;
         audioRef.current.load();
         await audioRef.current.play();
       }

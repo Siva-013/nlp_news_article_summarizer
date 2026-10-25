@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getAudioUrl, getVoices, synthesizeSpeech } from '../api/speech.js';
+import { getAudioBlobUrl, getVoices, synthesizeSpeech } from '../api/speech.js';
 import { Button } from '../components/ui/Button.jsx';
 import { Field } from '../components/ui/Field.jsx';
 import { EmptyState } from '../components/ui/EmptyState.jsx';
@@ -48,6 +48,12 @@ export function Listen() {
       .catch(() => setVoices([]));
   }, []);
 
+  // Release the latest blob URL when leaving the page
+  useEffect(() => () => {
+    if (result?.playUrl?.startsWith('blob:')) URL.revokeObjectURL(result.playUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleSynthesize() {
     const trimmed = text.trim();
     if (!trimmed) {
@@ -65,7 +71,13 @@ export function Listen() {
         volume,
         voice_id: voiceId || undefined,
       });
-      setResult({ ...res, playUrl: getAudioUrl(res.audio_id) });
+      // Fetch the WAV with auth and play from a blob URL — media elements
+      // cannot send the Authorization header themselves.
+      const playUrl = await getAudioBlobUrl(res.audio_id);
+      setResult((prev) => {
+        if (prev?.playUrl?.startsWith('blob:')) URL.revokeObjectURL(prev.playUrl);
+        return { ...res, playUrl };
+      });
       toast('Audio ready', 'success');
     } catch (err) {
       setError(err.detail || err.message || 'Speech synthesis failed.');

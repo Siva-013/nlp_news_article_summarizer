@@ -1,4 +1,4 @@
-import { apiFetch, getApiBase } from './client.js';
+import { apiFetch } from './client.js';
 
 /** POST /api/v1/speech/synthesize */
 export function synthesizeSpeech({ text, rate = 175, volume = 1.0, voice_id }) {
@@ -15,7 +15,16 @@ export function getVoices() {
   return apiFetch('/api/v1/speech/voices');
 }
 
-/** Absolute URL for playback / download of a synthesized WAV file */
-export function getAudioUrl(audioId) {
-  return `${getApiBase()}/api/v1/speech/audio/${encodeURIComponent(audioId)}`;
+/**
+ * Fetch a synthesized WAV with the auth header attached and return a blob
+ * object URL for <audio> playback / download links.
+ *
+ * The audio endpoint requires a Bearer token, and media elements cannot send
+ * Authorization headers — so direct URLs get a 401. Fetching the bytes here
+ * (authenticated) and playing from a blob URL keeps the endpoint protected.
+ */
+export async function getAudioBlobUrl(audioId) {
+  const res = await apiFetch(`/api/v1/speech/audio/${encodeURIComponent(audioId)}`);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
 }
