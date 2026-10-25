@@ -143,7 +143,7 @@
 
 .auth__input {
   width: 100%;
-  background: #faf8f0;
+  background: var(--paper-input);
   border: var(--rule-soft);
   border-radius: var(--radius-sm);
   color: var(--ink);
@@ -151,6 +151,11 @@
   font-size: 0.94rem;
   margin-bottom: var(--space-3);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.auth__input::placeholder {
+  color: var(--placeholder);
+  font-style: italic;
 }
 
 .auth__input:focus {
