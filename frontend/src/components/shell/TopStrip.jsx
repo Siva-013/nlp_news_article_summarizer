@@ -1,32 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ThemeToggle } from '../ThemeToggle.jsx';
 import './TopStrip.css';
 
 /**
  * Thin strip above the content: breadcrumb tabs (per-section context),
- * a global search that jumps into History search, a day/night theme
+ * a global search that jumps into History search, the day/night theme
  * toggle, and the menu button shown on narrow screens.
  */
 export function TopStrip({ section, crumbs = [], onMenuOpen }) {
   const navigate = useNavigate();
   const [q, setQ] = useState('');
-  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'day');
 
   function submitSearch(e) {
     e.preventDefault();
     const term = q.trim();
     navigate(term ? `/history?q=${encodeURIComponent(term)}` : '/history');
-  }
-
-  function toggleTheme() {
-    const next = theme === 'day' ? 'night' : 'day';
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
-    try {
-      localStorage.setItem('lexica_theme', next);
-    } catch {
-      /* storage unavailable */
-    }
   }
 
   return (
@@ -58,15 +47,7 @@ export function TopStrip({ section, crumbs = [], onMenuOpen }) {
           aria-label="Search article history"
         />
       </form>
-      <button
-        type="button"
-        className="strip__theme"
-        onClick={toggleTheme}
-        aria-label={theme === 'day' ? 'Switch to night theme' : 'Switch to day theme'}
-        title={theme === 'day' ? 'Night notebook' : 'Day notebook'}
-      >
-        {theme === 'day' ? '☾' : '☀'}
-      </button>
+      <ThemeToggle variant="strip" />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ThemeToggle } from '../components/ThemeToggle.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useHealth } from '../context/HealthContext.jsx';
 import './Login.css';
@@ -57,6 +58,9 @@ export function Login() {
 
   return (
     <div className="auth">
+      <div className="auth__theme">
+        <ThemeToggle variant="floating" />
+      </div>
       <div className="auth__panel">
         <div className="auth__brand">
           <span className="auth__glyph" aria-hidden="true">L</span>

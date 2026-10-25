@@ -1,4 +1,5 @@
 .auth {
+  position: relative;
   min-height: 100dvh;
   display: grid;
   place-items: center;
@@ -222,4 +223,11 @@
     padding: var(--space-6);
   }
   .auth__points { display: none; }
+}
+
+/* Floating theme toggle on the login board */
+.auth__theme {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
 }

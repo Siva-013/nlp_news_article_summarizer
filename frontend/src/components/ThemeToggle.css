@@ -1,0 +1,40 @@
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--rule-soft);
+  background: var(--paper-card);
+  color: var(--ink);
+  font-family: inherit;
+  line-height: 1;
+  transition: border-color var(--transition-fast), background var(--transition-fast),
+    color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  border-color: var(--ink);
+  background: var(--lime);
+  color: var(--on-lime);
+  transform: rotate(-12deg);
+}
+
+/* Compact rectangle for the app top strip */
+.theme-toggle--strip {
+  width: 34px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+/* Round button for standalone pages (login) */
+.theme-toggle--floating {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  box-shadow: 3px 3px 0 var(--shadow-soft);
+}
+
+.theme-toggle--floating:hover {
+  box-shadow: 4px 4px 0 var(--shadow-soft);
+}
