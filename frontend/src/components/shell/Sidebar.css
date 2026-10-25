@@ -39,7 +39,7 @@
 
 .sidebar__wordmark-hl {
   background: var(--lime);
-  color: var(--ink);
+  color: var(--on-lime);
   padding: 0 4px;
   border-radius: 3px;
 }
@@ -96,7 +96,7 @@
 
 .sidebar__link--active {
   background: var(--lime);
-  color: var(--ink);
+  color: var(--on-lime);
   font-weight: 700;
   box-shadow: 2px 2px 0 #f5f2e933;
 }
@@ -165,7 +165,7 @@
   border-radius: 50%;
   border: 1px solid #f5f2e9;
   background: var(--lime);
-  color: var(--ink);
+  color: var(--on-lime);
   font-weight: 800;
   font-size: 0.72rem;
   display: grid;

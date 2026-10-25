@@ -26,7 +26,7 @@
 }
 
 .tabbar__item--active {
-  color: var(--ink);
+  color: var(--on-lime);
   background: var(--lime);
 }
 
